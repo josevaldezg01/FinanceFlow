@@ -1,10 +1,1063 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>FinanceFlow</title>
-    <script src="app.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Control de Gastos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .bank-card {
+      transition: all 0.3s ease;
+    }
+    .bank-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .movement-item {
+      border-left: 4px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .movement-item:hover {
+      background-color: #f8fafc;
+    }
+    .income {
+      border-left-color: #10b981;
+    }
+    .expense {
+      border-left-color: #ef4444;
+    }
+    .transfer {
+      border-left-color: #3b82f6;
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+    @media (max-width: 640px) {
+      .chart-container {
+        height: 200px;
+      }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      max-width: 90%;
+      max-height: 90%;
+      overflow-y: auto;
+    }
+  </style>
 </head>
-<body>
-    <h1>Control Financiero</h1>
+<body class="bg-gray-50 text-gray-900 p-4 min-h-screen">
+  <div class="max-w-6xl mx-auto">
+    <header class="mb-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2 text-indigo-700">
+        <i class="fas fa-wallet mr-2"></i>Control de Gastos Personales
+      </h1>
+      <p class="text-gray-600">Administra tus finanzas de manera inteligente</p>
+    </header>
+
+    <!-- Botón para cerrar mes y ver meses anteriores -->
+    <section class="mb-6 flex justify-between items-center">
+      <button onclick="mostrarModalMesesAnteriores()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded flex items-center">
+        <i class="fas fa-calendar-alt mr-2"></i>Ver Meses Anteriores
+      </button>
+      <button onclick="cerrarMes()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center">
+        <i class="fas fa-calendar-check mr-2"></i>Cerrar Mes Actual
+      </button>
+    </section>
+
+    <!-- Saldos por Banco -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold mb-4 flex items-center">
+        <i class="fas fa-piggy-bank mr-2 text-indigo-500"></i>Saldos por Banco
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+              <i class="fas fa-university text-blue-500"></i>
+            </div>
+            <h3 class="font-semibold">Banco de Bogotá</h3>
+          </div>
+          <p id="saldoBancoBogota" class="font-bold text-blue-600 text-xl">$0</p>
+        </div>
+                
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
+              <i class="fas fa-mobile-alt text-green-500"></i>
+            </div>
+            <h3 class="font-semibold">Nequi</h3>
+          </div>
+          <p id="saldoNequi" class="font-bold text-green-600 text-xl">$0</p>
+        </div>
+                
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
+              <i class="fas fa-money-bill-wave text-purple-500"></i>
+            </div>
+            <h3 class="font-semibold">Daviplata</h3>
+          </div>
+          <p id="saldoDaviplata" class="font-bold text-purple-600 text-xl">$0</p>
+        </div>
+                
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
+              <i class="fas fa-credit-card text-red-500"></i>
+            </div>
+            <h3 class="font-semibold">Colpatria</h3>
+          </div>
+          <p id="saldoColpatria" class="font-bold text-red-600 text-xl">$0</p>
+        </div>
+                
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
+              <i class="fas fa-coins text-yellow-500"></i>
+            </div>
+            <h3 class="font-semibold">Bolsillo</h3>
+          </div>
+          <p id="saldoBolsillo" class="font-bold text-yellow-600 text-xl">$0</p>
+        </div>
+                
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+              <i class="fas fa-hand-holding-usd text-gray-500"></i>
+            </div>
+            <h3 class="font-semibold">Efectivo</h3>
+          </div>
+          <p id="saldoEfectivo" class="font-bold text-gray-600 text-xl">$0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gráficos y Estadísticas -->
+    <section class="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4 flex items-center">
+          <i class="fas fa-chart-pie mr-2 text-indigo-500"></i>Distribución de Fondos
+        </h2>
+        <div class="chart-container">
+          <canvas id="distributionChart"></canvas>
+        </div>
+      </div>
+            
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4 flex items-center">
+          <i class="fas fa-chart-bar mr-2 text-indigo-500"></i>Movimientos Mensuales
+        </h2>
+        <div class="chart-container">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Totales -->
+    <section class="mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
+              <i class="fas fa-arrow-up text-green-500"></i>
+            </div>
+            <h3 class="font-semibold">Ingresos Totales</h3>
+          </div>
+          <p id="ingresosTotales" class="text-green-600 font-bold text-xl">$0</p>
+        </div>
+                
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
+              <i class="fas fa-arrow-down text-red-500"></i>
+            </div>
+            <h3 class="font-semibold">Gastos Totales</h3>
+          </div>
+          <p id="gastosTotales" class="text-red-600 font-bold text-xl">$0</p>
+        </div>
+                
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+              <i class="fas fa-balance-scale text-blue-500"></i>
+            </div>
+            <h3 class="font-semibold">Balance Total</h3>
+          </div>
+          <p id="diferenciaTotales" class="text-blue-600 font-bold text-xl">$0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Saldos reales -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4 flex items-center">
+        <i class="fas fa-calculator mr-2 text-indigo-500"></i>Conciliación Bancaria
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Banco de Bogotá</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input id="realBancoBogota" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+                
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nequi</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input id="realNequi" type="number, placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+                
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Daviplata</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input id="realDaviplata" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+                
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Colpatria</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input id="realColpatria" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+                
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Bolsillo</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input id="realBolsillo" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+                
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Efectivo</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input id="realEfectivo" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+      </div>
+      <button onclick="calcularDescuadre()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center justify-center">
+        <i class="fas fa-search-dollar mr-2"></i>Calcular Descuadre
+      </button>
+    </section>
+
+    <!-- Filtro por banco -->
+    <section class="mb-8 bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-2 flex items-center">
+        <i class="fas fa-filter mr-2 text-indigo-500"></i>Filtrar Movimientos
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Por Banco</label>
+          <select id="filtroBanco" onchange="filtrarHistorialPorBanco()" class="border p-2 rounded w-full">
+            <option value="">-- Todos los Bancos --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Por Tipo</label>
+          <select id="filtroTipo" onchange="filtrarHistorialPorTipo()" class="border p-2 rounded w-full">
+            <option value="">-- Todos los Tipos --</option>
+            <option value="ingreso">Ingresos</option>
+            <option value="gasto">Gastos</option>
+            <option value="transferencia">Transferencias</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historial -->
+    <section class="mb-8 bg-white p-4 rounded-lg shadow-md">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold flex items-center">
+          <i class="fas fa-history mr-2 text-indigo-500"></i>Historial de Movimientos
+        </h2>
+        <button onclick="exportarHistorial()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-1 px-3 rounded text-sm flex items-center">
+          <i class="fas fa-file-export mr-1"></i>Exportar
+        </button>
+      </div>
+      <div id="historial" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+        <!-- Movimientos se agregarán aquí -->
+      </div>
+    </section>
+
+    <!-- Registrar Movimiento -->
+    <section class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4 flex items-center">
+        <i class="fas fa-plus-circle mr-2 text-indigo-500"></i>Registrar Movimiento
+      </h2>
+            
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Agregar Ingreso -->
+        <div class="border border-green-200 rounded-lg p-4 bg-green-50">
+          <h3 class="font-semibold text-green-700 mb-3 flex items-center">
+            <i class="fas fa-plus-circle mr-2"></i>Nuevo Ingreso
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
+              <select id="bancoIngreso" class="border p-2 rounded w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                <input type="number" id="valorIngreso" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+              <input type="text" id="descripcionIngreso" placeholder="Ej: Salario" class="border p-2 rounded w-full" />
+            </div>
+            <button onclick="registrarIngreso()" class="w-full bg-green-600 hover:bg-green-7text-white py-2 px-4 rounded flex items-center justify-center">
+              <i class="fas fa-check-circle mr-2"></i>Registrar Ingreso
+            </button>
+          </div>
+        </div>
+
+        <!-- Agregar Gasto -->
+        <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+          <h3 class="font-semibold text-red-700 mb-3 flex items-center">
+            <i class="fas fa-minus-circle mr-2"></i>Nuevo Gasto
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Banco Origen</label>
+              <select id="bancoGasto" class="border p-2 rounded w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                <input type="number" id="valorGasto" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+              <input type="text" id="descripcionGasto" placeholder="Ej: Supermercado" class="border p-2 rounded w-full" />
+            </div>
+            <button onclick="registrarGasto()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded flex items-center justify-center">
+              <i class="fas fa-check-circle mr-2"></i>Registrar Gasto
+            </button>
+          </div>
+        </div>
+
+        <!-- Transferencia -->
+        <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+          <h3 class="font-semibold text-blue-700 mb-3 flex items-center">
+            <i class="fas fa-exchange-alt mr-2"></i>Transferencia
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+              <select id="desdeBanco" class="border p-2 rounded w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Hacia</label>
+              <select id="haciaBanco" class="border p-2 rounded w-full"></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                <input type="number" id="valorTransferencia" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+              </div>
+            </div>
+            <button onclick="transferir()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center justify-center">
+              <i class="fas fa-exchange-alt mr-2"></i>Realizar Transferencia
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal para ver meses anteriores -->
+  <div id="modalMesesAnteriores" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold flex items-center">
+          <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i>Meses Anteriores
+        </h2>
+        <button onclick="cerrarModal('modalMesesAnteriores')" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="listaMeses" class="space-y-2">
+        <!-- Lista de meses se agregará aquí -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver detalles de un mes -->
+  <div id="modalDetalleMes" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="tituloDetalleMes" class="text-xl font-semibold flex items-center">
+          <i class="fas fa-file-invoice-dollar mr-2 text-indigo-500"></i>Detalle del Mes
+        </h2>
+        <button onclick="cerrarModal('modalDetalleMes')" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
+              <i class="fas fa-arrow-up text-green-500"></i>
+            </div>
+            <h3 class="font-semibold">Ingresos Totales</h3>
+          </div>
+          <p id="detalleIngresos" class="text-green-600 font-bold text-xl">$0</p>
+        </div>
+                
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
+              <i class="fas fa-arrow-down text-red-500"></i>
+            </div>
+            <h3 class="font-semibold">Gastos Totales</h3>
+          </div>
+          <p id="detalleGastos" class="text-red-600 font-bold text-xl">$0</p>
+        </div>
+                
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+              <i class="fas fa-balance-scale text-blue-500"></i
+            </div>
+            <h3 class="font-semibold">Balance Total</h3>
+          </div>
+          <p id="detalleBalance" class="text-blue-600 font-bold text-xl">$0</p>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+        <h3 class="font-semibold mb-2">Saldos Finales</h3>
+        <div id="detalleSaldos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <!-- Saldos por banco se agregarán aquí -->
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h3 class="font-semibold mb-2">Movimientos</h3>
+        <div id="detalleMovimientos" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+          <!-- Movimientos se agregarán aquí -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Datos iniciales
+    let bancos = {
+      "Banco de Bogotá": 0,
+      "Nequi": 0,
+      "Daviplata": 0,
+      "Colpatria": 0,
+      "Bolsillo Otros Ingresos": 0,
+      "Efectivo": 0
+    };
+
+    let movimientos = {
+      "Banco de Bogotá": [],
+      "Nequi": [],
+      "Daviplata": [],
+      "Colpatria": [],
+      "Bolsillo Otros Ingresos": [],
+      "Efectivo": []
+    };
+
+    // Almacenamiento de meses cerrados
+    let mesesCerrados = JSON.parse(localStorage.getItem('mesesCerrados')) || [];
+
+    // Variables para gráficos
+    let distributionChart, monthlyChart;
+
+    // Formatear moneda
+    function formatoMoneda(valor) {
+      return "$" + valor.toLocaleString("es-CO");
+    }
+
+    // Inicializar selects de bancos
+    function actualizarFiltroBanco() {
+      const selectFiltro = document.getElementById("filtroBanco");
+      selectFiltro.innerHTML = '<option value="">-- Todos los Bancos --</option>';
+            
+      for (const banco in bancos) {
+        const option = document.createElement("option");
+        option.value = banco;
+        option.textContent = banco;
+        selectFiltro.appendChild(option);
+      }
+
+      const selects = ["bancoIngreso", "bancoGasto", "desdeBanco", "haciaBanco"];
+      for (const id of selects) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '';
+        for (const banco in bancos) {
+          const opt = document.createElement("option");
+          opt.value = banco;
+          opt.textContent = banco;
+          sel.appendChild(opt);
+        }
+      }
+            
+      // Inicializar gráficos
+      inicializarGraficos();
+    }
+
+    // Registrar ingreso
+    function registrarIngreso() {
+      const banco = document.getElementById("bancoIngreso").value;
+      const valor = Number(document.getElementById("valorIngreso").value);
+      const desc = document.getElementById("descripcionIngreso").value;
+
+      if (!banco || !valor) {
+        mostrarAlerta("Por favor completa todos los campos", "error");
+        return;
+      }
+
+      bancos[banco] += valor;
+      const fecha = new Date().toLocaleString();
+      movimientos[banco].push({ tipo: "ingreso", valor, desc, fecha, banco });
+            
+      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
+      actualizarTotales();
+            
+      // Limpiar campos
+      document.getElementById("valorIngreso").value = "";
+      document.getElementById("descripcionIngreso").value = "";
+            
+      mostrarAlerta("Ingreso registrado con éxito", "success");
+    }
+
+    // Registrar gasto
+    function registrarGasto() {
+      const banco = document.getElementById("bancoGasto").value;
+      const valor = Number(document.getElementById("valorGasto").value);
+      const desc = document.getElementById("descripcionGasto").value;
+
+      if (!banco || !valor) {
+        mostrarAlerta("Por favor completa todos los campos", "error");
+        return;
+      }
+
+      // Verificar si hay suficiente saldo en el banco
+      if (valor > bancos[banco]) {
+        mostrarAlerta(`No tienes suficiente saldo en ${banco} para realizar este gasto. Saldo disponible: ${formatoMoneda(bancos[banco])}`, "error");
+        return;
+      }
+
+      bancos[banco] -= valor;
+      const fecha = new Date().toLocaleString();
+      movimientos[banco].push({ tipo: "gasto", valor, desc, fecha, banco });
+            
+      agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto");
+      actualizarTotales();
+            
+      // Limpiar campos
+      document.getElementById("valorGasto").value = "";
+      document.getElementById("descripcionGasto").value = "";
+            
+      mostrarAlerta("Gasto registrado con éxito", "success");
+    }
+
+    // Transferir entre cuentas
+    function transferir() {
+      const desde = document.getElementById("desdeBanco").value;
+      const hacia = document.getElementById("haciaBanco").value;
+      const valor = Number(document.getElementById("valorTransferencia").value);
+
+      if (!desde || !hacia || !valor) {
+        mostrarAlerta("Por favor completa todos los campos", "error");
+        return;
+      }
+
+      if (desde === hacia) {
+        mostrarAlerta("No puedes transferir al mismo banco", "error");
+        return;
+      }
+
+      // Verificar si hay suficiente saldo en el banco de origen
+      if (valor > bancos[desde]) {
+        mostrarAlerta(`No tienes suficiente saldo en ${desde} para realizar esta transferencia. Saldo disponible: ${formatoMoneda(bancos[desde])}`, "error");
+        return;
+      }
+
+      bancos[desde] -= valor;
+      bancos[hacia] += valor;
+            
+      const fecha = new Date().toLocaleString();
+      movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
+      movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
+            
+      agregarHistorial(`Transferencia de ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia");
+      actualizarTotales();
+            
+      // Limpiar campo
+      document.getElementById("valorTransferencia").value = "";
+            
+      mostrarAlerta("Transferencia realizada con éxito", "success");
+    }
+
+    // Agregar movimiento al historial
+    function agregarHistorial(texto, banco, tipo) {
+      const div = document.createElement("div");
+      div.className = `movement-item p-3 rounded ${tipo}`;
+      div.dataset.banco = banco;
+      div.dataset.tipo = tipo;
+            
+      const fecha = new Date().toLocaleString();
+            
+      div.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="font-medium">${texto}</p>
+            <p class="text-xs text-gray-500">${fecha}</p>
+          </div>
+          <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      `;
+            
+      document.getElementById("historial").prepend(div);
+    }
+
+    // Filtrar historial por banco
+    function filtrarHistorialPorBanco() {
+      const filtro = document.getElementById("filtroBanco").value;
+      const historial = document.getElementById("historial").children;
+            
+      for (const item of historial) {
+        const mostrar = (filtro === "" || item.dataset.banco === filtro) &&
+                        (document.getElementById("filtroTipo").value === "" ||
+                         item.dataset.tipo === document.getElementById("filtroTipo").value);
+        item.style.display = mostrar ? "block" : "none";
+      }
+    }
+
+    // Filtrar historial por tipo
+    function filtrarHistorialPorTipo() {
+      const filtro = document.getElementById("filtroTipo").value;
+      const historial = document.getElementById("historial").children;
+            
+      for (const item of historial) {
+        const mostrar = (filtro === "" || item.dataset.tipo === filtro) &&
+                        (document.getElementById("filtroBanco").value === "" ||
+                         item.dataset.banco === document.getElementById("filtroBanco").value);
+        item.style.display = mostrar ? "block" : "none";
+      }
+    }
+
+    // Actualizar totales y gráficos
+    function actualizarTotales() {
+      let ingresos = 0, gastos = 0;
+
+      for (const banco in movimientos) {
+        for (const mov of movimientos[banco]) {
+          if (mov.tipo === "ingreso") ingresos += mov.valor;
+          else if (mov.tipo === "gasto") gastos += mov.valor;
+        }
+      }
+
+      document.getElementById("ingresosTotales").textContent = formatoMoneda(ingresos);
+      document.getElementById("gastosTotales").textContent = formatoMoneda(gastos);
+      document.getElementById("diferenciaTotales").textContent = formatoMoneda(ingresos - gastos);
+
+      // Actualizar saldos visibles
+      document.getElementById("saldoBancoBogota").textContent = formatoMoneda(bancos["Banco de Bogotá"]);
+      document.getElementById("saldoNequi").textContent = formatoMoneda(bancos["Nequi"]);
+      document.getElementById("saldoDaviplata").textContent = formatoMoneda(bancos["Daviplata"]);
+      document.getElementById("saldoColpatria").textContent = formatoMoneda(bancos["Colpatria"]);
+      document.getElementById("saldoBolsillo").textContent = formatoMoneda(bancos["Bolsillo Otros Ingresos"]);
+      document.getElementById("saldoEfectivo").textContent = formatoMoneda(bancos["Efectivo"]);
+            
+      // Actualizar gráficos
+      actualizarGraficos();
+    }
+
+    // Calcular descuadre entre saldos reales y registrados
+    function calcularDescuadre() {
+      const reales = {
+        "Banco de Bogotá": Number(document.getElementById("realBancoBogota").value) || 0,
+        "Nequi": Number(document.getElementById("realNequi").value) || 0,
+        "Daviplata": Number(document.getElementById("realDaviplata").value) || 0,
+        "Colpatria": Number(document.getElementById("realColpatria").value) || 0,
+        "Bolsillo Otros Ingresos": Number(document.getElementById("realBolsillo").value) || 0,
+        "Efectivo": Number(document.getElementById("realEfectivo").value) || 0
+      };
+
+      let resultado = "📊 Descuadre Detectado:\n";
+      let hayDescuadre = false;
+            
+      for (const banco in reales) {
+        const real = reales[banco];
+        const registrado = bancos[banco];
+        const diferencia = real - registrado;
+                
+        if (diferencia !== 0) {
+          hayDescuadre = true;
+          resultado += `• ${banco}: ${formatoMoneda(diferencia)}\n`;
+        }
+      }
+
+      if (hayDescuadre) {
+        mostrarAlerta(resultado, "warning");
+      } else {
+        mostrarAlerta("¡Perfecto! No hay descuadres detectados.", "success");
+      }
+    }
+
+    // Inicializar gráficos
+    function inicializarGraficos() {
+      const ctxDistribution = document.getElementById('distributionChart').getContext('2d');
+      const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+            
+      // Colores para los gráficos
+      const colors = [
+        '#3B82F6', // Azul
+        '#10B981', // Verde
+        '#8B5CF6', // Violeta
+        '#EF4444', // Rojo
+        '#F59E0B', // Amarillo
+        '#64748B'  // Gris
+      ];
+            
+      distributionChart = new Chart(ctxDistribution, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(bancos),
+          datasets: [{
+            data: Object.values(bancos),
+            backgroundColor: colors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.label}: ${formatoMoneda(context.raw)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+            
+      monthlyChart = new Chart(ctxMonthly, {
+        type: 'bar',
+        data: {
+          labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+          datasets: [
+            {
+              label: 'Ingresos',
+              data: Array(12).fill(0),
+              backgroundColor: '#10B981',
+            },
+            {
+              label: 'Gastos',
+              data: Array(12).fill(0),
+              backgroundColor: '#EF4444',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: false,
+            },
+            y: {
+              stacked: false,
+              ticks: {
+                callback: function(value) {
+                  return formatoMoneda(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${formatoMoneda(context.raw)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+        
+    // Actualizar gráficos
+    function actualizarGraficos() {
+      if (distributionChart) {
+        distributionChart.data.datasets[0].data = Object.values(bancos);
+        distributionChart.update();
+      }
+    }
+        
+    // Mostrar alerta personalizada
+    function mostrarAlerta(mensaje, tipo) {
+      const alerta = document.createElement('div');
+      alerta.className = `fixed top-4 right-4 p-4 rounded shadow-lg text-white max-w-xs z-50 transform transition-all duration-300 ${
+        tipo === 'error' ? 'bg-red-500' : 
+        tipo === 'success' ? 'bg-green-500' : 
+        'bg-yellow-500'
+      }`;
+            
+      alerta.innerHTML = `
+        <div class="flex items-start">
+          <i class="fas ${
+            tipo === 'error' ? 'fa-exclamation-circle' : 
+            tipo === 'success' ? 'fa-check-circle' : 
+            'fa-exclamation-triangle'
+          } mr-2 mt-1"></i>
+          <div>
+            <p class="font-medium">${mensaje.split('\n')[0]}</p>
+            ${mensaje.includes('\n') ? `<p class="text-sm mt-1">${mensaje.split('\n').slice(1).join('\n')}</p>` : ''}
+          </div>
+          <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+            
+      document.body.appendChild(alerta);
+            
+      setTimeout(() => {
+        alerta.remove();
+      }, 5000);
+    }
+        
+    // Eliminar movimiento
+    function eliminarMovimiento(elemento) {
+      if (confirm("¿Estás seguro de eliminar este movimiento?")) {
+        elemento.closest('.movement-item').remove();
+        // Aquí deberías también eliminar el movimiento de la estructura de datos
+        mostrarAlerta("Movimiento eliminado", "success");
+      }
+    }
+        
+    // Exportar historial
+    function exportarHistorial() {
+      let csvContent = "Fecha,Banco,Tipo,Valor,Descripción\n";
+            
+      for (const banco in movimientos) {
+        for (const mov of movimientos[banco]) {
+          csvContent += `"${mov.fecha}","${banco}","${mov.tipo}","${mov.valor}","${mov.desc}"\n`;
+        }
+      }
+            
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `historial_gastos_${new Date().toISOString().slice(0,10)}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+            
+      mostrarAlerta("Historial exportado como CSV", "success");
+    }
+
+    // Cerrar el mes actual
+    function cerrarMes() {
+      if (confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) {
+        const fechaActual = new Date();
+        const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11
+        const año = fechaActual.getFullYear();
+        const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+                
+        // Calcular ingresos y gastos totales
+        let ingresos = 0, gastos = 0;
+        for (const banco in movimientos) {
+          for (const mov of movimientos[banco]) {
+            if (mov.tipo === "ingreso") ingresos += mov.valor;
+            else if (mov.tipo === "gasto") gastos += mov.valor;
+          }
+        }
+                
+        // Crear copia de los datos actuales
+        const datosMes = {
+          id: Date.now(),
+          mes: mes,
+          año: año,
+          nombreMes: nombreMes,
+          fechaCierre: fechaActual.toLocaleString(),
+          saldos: {...bancos},
+          movimientos: JSON.parse(JSON.stringify(movimientos)), // Deep copy
+          ingresos: ingresos,
+          gastos: gastos,
+          balance: ingresos - gastos
+        };
+                
+        // Guardar en el almacenamiento
+        mesesCerrados.push(datosMes);
+        localStorage.setItem('mesesCerrados', JSON.stringify(mesesCerrados));
+                
+        // Reiniciar los datos para el nuevo mes
+        for (const banco in bancos) {
+          bancos[banco] = 0;
+          movimientos[banco] = [];
+        }
+                
+        // Limpiar el historial visible
+        document.getElementById("historial").innerHTML = "";
+                
+        // Actualizar totales
+        actualizarTotales();
+                
+        mostrarAlerta(`Mes ${nombreMes} cerrado correctamente. Los datos han sido guardados.`, "success");
+      }
+    }
+
+    // Mostrar modal con meses anteriores
+    function mostrarModalMesesAnteriores() {
+      const listaMeses = document.getElementById("listaMeses");
+      listaMeses.innerHTML = "";
+            
+      if (mesesCerrados.length === 0) {
+        listaMeses.innerHTML = '<p class="text-gray-500 text-center py-4">No hay meses cerrados registrados.</p>';
+      } else {
+        // Ordenar por fecha (más reciente primero)
+        mesesCerrados.sort((a, b) => b.id - a.id);
+                
+        for (const mes of mesesCerrados) {
+          const item = document.createElement("div");
+          item.className = "bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-50";
+          item.onclick = () => mostrarDetalleMes(mes);
+                    
+          item.innerHTML = `
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-semibold">${mes.nombreMes.charAt(0).toUpperCase() + mes.nombreMes.slice(1)} ${mes.año}</h3>
+                <p class="text-sm text-gray-500">Cerrado el ${mes.fechaCierre}</p>
+              </div>
+              <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+          `;
+                    
+          listaMeses.appendChild(item);
+        }
+      }
+            
+      document.getElementById("modalMesesAnteriores").style.display = "flex";
+    }
+
+    // Mostrar detalle de un mes específico
+    function mostrarDetalleMes(mes) {
+      document.getElementById("tituloDetalleMes").innerHTML = `
+        <i class="fas fa-file-invoice-dollar mr-2 text-indigo-500"></i>
+        ${mes.nombreMes.charAt(0).toUpperCase() + mes.nombreMes.slice(1)} ${mes.año}
+      `;
+            
+      // Actualizar totales
+      document.getElementById("detalleIngresos").textContent = formatoMoneda(mes.ingresos);
+      document.getElementById("detalleGastos").textContent = formatoMoneda(mes.gastos);
+      document.getElementById("detalleBalance").textContent = formatoMoneda(mes.balance);
+            
+      // Mostrar saldos por banco
+      const detalleSaldos = document.getElementById("detalleSaldos");
+      detalleSaldos.innerHTML = "";
+            
+      for (const banco in mes.saldos) {
+        const saldoDiv = document.createElement("div");
+        saldoDiv.className = "bg-gray-50 p-2 rounded";
+        saldoDiv.innerHTML = `
+          <p class="text-sm font-medium">${banco}</p>
+          <p class="font-bold">${formatoMoneda(mes.saldos[banco])}</p>
+        `;
+        detalleSaldos.appendChild(saldoDiv);
+      }
+            
+      // Mostrar movimientos
+      const detalleMovimientos = document.getElementById("detalleMovimientos");
+      detalleMovimientos.innerHTML = "";
+            
+      // Recolectar todos los movimientos de todos los bancos
+      let todosMovimientos = [];
+      for (const banco in mes.movimientos) {
+        for (const mov of mes.movimientos[banco]) {
+          todosMovimientos.push({
+            ...mov,
+            banco: banco
+          });
+        }
+      }
+            
+      // Ordenar por fecha (más reciente primero)
+      todosMovimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+      // Mostrar movimientos
+      for (const mov of todosMovimientos) {
+        const div = document.createElement("div");
+        div.className = `movement-item p-3 rounded ${mov.tipo}`;
+                
+        let texto = "";
+        if (mov.tipo === "ingreso") {
+          texto = `+ ${formatoMoneda(mov.valor)} en ${mov.banco} - ${mov.desc}`;
+        } else if (mov.tipo === "gasto") {
+          texto = `- ${formatoMoneda(mov.valor)} en ${mov.banco} - ${mov.desc}`;
+        } else {
+          texto = `Transferencia de ${formatoMoneda(mov.valor)} - ${mov.desc}`;
+        }
+                
+        div.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="font-medium">${texto}</p>
+              <p class="text-xs text-gray-500">${mov.fecha}</p>
+            </div>
+          </div>
+        `;
+                
+        detalleMovimientos.appendChild(div);
+      }
+            
+      // Cerrar modal de meses y abrir modal de detalle
+      cerrarModal("modalMesesAnteriores");
+      document.getElementById("modalDetalleMes").style.display = "flex";
+    }
+
+    // Cerrar modal
+    function cerrarModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    // Inicializar la aplicación
+    actualizarFiltroBanco();
+  </script>
 </body>
 </html>
