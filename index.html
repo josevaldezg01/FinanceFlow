@@ -7,6 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
   <style>
     .bank-card {
       transition: all 0.3s ease;
@@ -1058,6 +1061,11 @@
 
     // Inicializar la aplicación
     actualizarFiltroBanco();
+  // Conectar a Supabase
+  const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co'; // tu URL
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8'; // tu API key pública (anon)
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
   </script>
 </body>
 </html>
