@@ -531,23 +531,41 @@
     }
 
     // Registrar ingreso
-    function registrarIngreso() {
-      const banco = document.getElementById("bancoIngreso").value;
-      const valor = Number(document.getElementById("valorIngreso").value);
-      const desc = document.getElementById("descripcionIngreso").value;
+async function registrarIngreso() {
+  const banco = document.getElementById("bancoIngreso").value;
+  const valor = Number(document.getElementById("valorIngreso").value);
+  const desc = document.getElementById("descripcionIngreso").value;
 
-      if (!banco || !valor) {
-        mostrarAlerta("Por favor completa todos los campos", "error");
-        return;
-      }
+  if (!banco || !valor) {
+    mostrarAlerta("Por favor completa todos los campos", "error");
+    return;
+  }
 
-      bancos[banco] += valor;
-      const fecha = new Date().toLocaleString();
-      movimientos[banco].push({ tipo: "ingreso", valor, desc, fecha, banco });
-            
-      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
-      actualizarTotales();
-            
+  bancos[banco] += valor;
+  const fecha = new Date().toLocaleString();
+  movimientos[banco].push({ tipo: "ingreso", valor, desc, fecha, banco });
+
+  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
+  actualizarTotales();
+
+  // Enviar a Supabase
+  const { error } = await supabase.from('movimientos').insert([
+    {
+      tipo: "ingreso",
+      valor: valor,
+      descripcion: desc,
+      banco_destino: banco,
+      fecha: new Date().toISOString()
+    }
+  ]);
+
+  if (error) {
+    console.error("Error al guardar en Supabase:", error);
+    mostrarAlerta("❌ Error al guardar en la base de datos", "error");
+  } else {
+    mostrarAlerta("✅ Ingreso guardado correctamente", "success");
+  }
+}           
       // Limpiar campos
       document.getElementById("valorIngreso").value = "";
       document.getElementById("descripcionIngreso").value = "";
