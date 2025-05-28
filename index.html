@@ -530,7 +530,7 @@
       inicializarGraficos();
     }
 
-    // Registrar ingreso
+   // Registrar ingreso
 async function registrarIngreso() {
   const banco = document.getElementById("bancoIngreso").value;
   const valor = Number(document.getElementById("valorIngreso").value);
@@ -563,15 +563,12 @@ async function registrarIngreso() {
     console.error("Error al guardar en Supabase:", error);
     mostrarAlerta("❌ Error al guardar en la base de datos", "error");
   } else {
+    // Limpiar campos solo si todo fue exitoso
+    document.getElementById("valorIngreso").value = "";
+    document.getElementById("descripcionIngreso").value = "";
     mostrarAlerta("✅ Ingreso guardado correctamente", "success");
   }
-}           
-      // Limpiar campos
-      document.getElementById("valorIngreso").value = "";
-      document.getElementById("descripcionIngreso").value = "";
-            
-      mostrarAlerta("Ingreso registrado con éxito", "success");
-    }
+}
 
     // Registrar gasto
     function registrarGasto() {
