@@ -478,7 +478,7 @@
       "Nequi": 0,
       "Daviplata": 0,
       "Colpatria": 0,
-      "Bolsillo Otros Ingresos": 0,
+      "Bolsillo": 0,
       "Efectivo": 0
     };
 
@@ -487,7 +487,7 @@
       "Nequi": [],
       "Daviplata": [],
       "Colpatria": [],
-      "Bolsillo Otros Ingresos": [],
+      "Bolsillo": [],
       "Efectivo": []
     };
 
@@ -709,7 +709,7 @@ async function registrarIngreso() {
       document.getElementById("saldoNequi").textContent = formatoMoneda(bancos["Nequi"]);
       document.getElementById("saldoDaviplata").textContent = formatoMoneda(bancos["Daviplata"]);
       document.getElementById("saldoColpatria").textContent = formatoMoneda(bancos["Colpatria"]);
-      document.getElementById("saldoBolsillo").textContent = formatoMoneda(bancos["Bolsillo Otros Ingresos"]);
+      document.getElementById("saldoBolsillo").textContent = formatoMoneda(bancos["Bolsillo"]);
       document.getElementById("saldoEfectivo").textContent = formatoMoneda(bancos["Efectivo"]);
             
       // Actualizar gráficos
@@ -723,7 +723,7 @@ async function registrarIngreso() {
         "Nequi": Number(document.getElementById("realNequi").value) || 0,
         "Daviplata": Number(document.getElementById("realDaviplata").value) || 0,
         "Colpatria": Number(document.getElementById("realColpatria").value) || 0,
-        "Bolsillo Otros Ingresos": Number(document.getElementById("realBolsillo").value) || 0,
+        "Bolsillo": Number(document.getElementById("realBolsillo").value) || 0,
         "Efectivo": Number(document.getElementById("realEfectivo").value) || 0
       };
 
