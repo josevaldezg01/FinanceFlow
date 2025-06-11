@@ -226,7 +226,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Nequi</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realNequi" type="number, placeholder="0" class="pl-8 border p-2 rounded w-full" />
+            <input id="realNequi" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
           </div>
         </div>
                 
@@ -334,7 +334,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
               <input type="text" id="descripcionIngreso" placeholder="Ej: Salario" class="border p-2 rounded w-full" />
             </div>
-            <button onclick="registrarIngreso()" class="w-full bg-green-600 hover:bg-green-7text-white py-2 px-4 rounded flex items-center justify-center">
+            <button onclick="registrarIngreso()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center justify-center">
               <i class="fas fa-check-circle mr-2"></i>Registrar Ingreso
             </button>
           </div>
@@ -449,7 +449,7 @@
         <div class="bg-white p-4 rounded-lg shadow-md text-center">
           <div class="flex items-center justify-center mb-2">
             <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-              <i class="fas fa-balance-scale text-blue-500"></i
+              <i class="fas fa-balance-scale text-blue-500"></i>
             </div>
             <h3 class="font-semibold">Balance Total</h3>
           </div>
@@ -517,58 +517,62 @@
       const selects = ["bancoIngreso", "bancoGasto", "desdeBanco", "haciaBanco"];
       for (const id of selects) {
         const sel = document.getElementById(id);
-        sel.innerHTML = '';
-        for (const banco in bancos) {
-          const opt = document.createElement("option");
-          opt.value = banco;
-          opt.textContent = banco;
-          sel.appendChild(opt);
+        if (sel) {
+          sel.innerHTML = '';
+          for (const banco in bancos) {
+            const opt = document.createElement("option");
+            opt.value = banco;
+            opt.textContent = banco;
+            sel.appendChild(opt);
+          }
         }
       }
             
       // Inicializar gráficos
-      inicializarGraficos();
+      if (typeof inicializarGraficos === 'function') {
+        inicializarGraficos();
+      }
     }
 
-   // Registrar ingreso
-async function registrarIngreso() {
-  const banco = document.getElementById("bancoIngreso").value;
-  const valor = Number(document.getElementById("valorIngreso").value);
-  const desc = document.getElementById("descripcionIngreso").value;
+    // Registrar ingreso
+    async function registrarIngreso() {
+      const banco = document.getElementById("bancoIngreso").value;
+      const valor = Number(document.getElementById("valorIngreso").value);
+      const desc = document.getElementById("descripcionIngreso").value;
 
-  if (!banco || !valor) {
-    mostrarAlerta("Por favor completa todos los campos", "error");
-    return;
-  }
+      if (!banco || !valor) {
+        mostrarAlerta("Por favor completa todos los campos", "error");
+        return;
+      }
 
-  bancos[banco] += valor;
-  const fecha = new Date().toLocaleString();
-  movimientos[banco].push({ tipo: "ingreso", valor, desc, fecha, banco });
+      bancos[banco] += valor;
+      const fecha = new Date().toLocaleString();
+      movimientos[banco].push({ tipo: "ingreso", valor, desc, fecha, banco });
 
-  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
-  actualizarTotales();
+      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
+      actualizarTotales();
 
-  // Enviar a Supabase
-  const { error } = await supabase.from('movimientos').insert([
-    {
-      tipo: "ingreso",
-      valor: valor,
-      descripcion: desc,
-      banco_destino: banco,
-      fecha: new Date().toISOString()
+      // Enviar a Supabase
+      const { error } = await supabase.from('movimientos').insert([
+        {
+          tipo: "ingreso",
+          valor: valor,
+          descripcion: desc,
+          banco_destino: banco,
+          fecha: new Date().toISOString()
+        }
+      ]);
+
+      if (error) {
+        console.error("Error al guardar en Supabase:", error);
+        mostrarAlerta("❌ Error al guardar en la base de datos", "error");
+      } else {
+        // Limpiar campos solo si todo fue exitoso
+        document.getElementById("valorIngreso").value = "";
+        document.getElementById("descripcionIngreso").value = "";
+        mostrarAlerta("✅ Ingreso guardado correctamente", "success");
+      }
     }
-  ]);
-
-  if (error) {
-    console.error("Error al guardar en Supabase:", error);
-    mostrarAlerta("❌ Error al guardar en la base de datos", "error");
-  } else {
-    // Limpiar campos solo si todo fue exitoso
-    document.getElementById("valorIngreso").value = "";
-    document.getElementById("descripcionIngreso").value = "";
-    mostrarAlerta("✅ Ingreso guardado correctamente", "success");
-  }
-}
 
     // Registrar gasto
     function registrarGasto() {
@@ -1076,58 +1080,86 @@ async function registrarIngreso() {
 
     // Inicializar la aplicación
     async function cargarMovimientosDesdeSupabase() {
-  const { data, error } = await supabase
-    .from('movimientos')
-    .select('*')
-    .order('fecha', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('movimientos')
+          .select('*')
+          .order('fecha', { ascending: true });
 
-  if (error) {
-    console.error("❌ Error al cargar movimientos:", error);
-    mostrarAlerta("Error al cargar datos desde Supabase", "error");
-    return;
-  }
+        if (error) throw error;
+        
+        // Reiniciar variables locales
+        for (const banco in bancos) {
+          bancos[banco] = 0;
+          movimientos[banco] = [];
+        }
 
-  // Reiniciar variables locales
-  for (const banco in bancos) {
-    bancos[banco] = 0;
-    movimientos[banco] = [];
-  }
+        // Procesar cada movimiento
+        data.forEach(mov => {
+          const { tipo, valor, descripcion, fecha, banco_origen, banco_destino } = mov;
 
-  // Procesar cada movimiento
-  data.forEach(mov => {
-    const { tipo, valor, descripcion, fecha, banco_origen, banco_destino } = mov;
+          if (tipo === "ingreso") {
+            bancos[banco_destino] += valor;
+            movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
+            agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+          }
 
-    if (tipo === "ingreso") {
-      bancos[banco_destino] += valor;
-      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
-      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+          else if (tipo === "gasto") {
+            bancos[banco_destino] -= valor;
+            movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
+            agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+          }
+
+          else if (tipo === "transferencia") {
+            bancos[banco_origen] -= valor;
+            bancos[banco_destino] += valor;
+            movimientos[banco_origen].push({ tipo, valor, desc: descripcion, fecha, banco: banco_origen });
+            agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo);
+          }
+        });
+
+        actualizarTotales();
+      } catch (error) {
+        console.error("Error al cargar movimientos:", error);
+        mostrarAlerta("Error al cargar datos. Mostrando datos locales.", "error");
+        // Forzar la actualización de la UI con datos locales
+        actualizarFiltroBanco();
+        actualizarTotales();
+      }
     }
 
-    else if (tipo === "gasto") {
-      bancos[banco_destino] -= valor;
-      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
-      agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
-    }
-
-    else if (tipo === "transferencia") {
-      bancos[banco_origen] -= valor;
-      bancos[banco_destino] += valor;
-      movimientos[banco_origen].push({ tipo, valor, desc: descripcion, fecha, banco: banco_origen });
-      agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo);
-    }
-  });
-
-  actualizarTotales();
-}
     // Conectar a Supabase
-  const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co'; // tu URL
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8'; // tu API key pública (anon)
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    // Inicializar la app una vez Supabase está disponible
-(async () => {
-  await cargarMovimientosDesdeSupabase();
-  actualizarFiltroBanco();
-})(); 
+    const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Inicializar la app cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      // Inicializar bancos si no están definidos
+      if (!window.bancos) {
+        window.bancos = {
+          "Banco de Bogotá": 0,
+          "Nequi": 0,
+          "Daviplata": 0,
+          "Colpatria": 0,
+          "Bolsillo": 0,
+          "Efectivo": 0
+        };
+      }
+      
+      // Llamar a actualizarFiltroBanco después de que Supabase esté listo
+      (async () => {
+        try {
+          await cargarMovimientosDesdeSupabase();
+          actualizarFiltroBanco();
+          actualizarTotales();
+        } catch (error) {
+          console.error("Error al inicializar:", error);
+          // Si hay error con Supabase, al menos mostrar los bancos
+          actualizarFiltroBanco();
+        }
+      })();
+    });
   </script>
 </body>
 </html>
