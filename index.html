@@ -6,6 +6,7 @@
   <title>Control de Gastos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     .bank-card {
@@ -526,7 +527,7 @@
       // Inicializar gráficos
       inicializarGraficos();
     }
-
+    
     // Registrar ingreso
     function registrarIngreso() {
       const banco = document.getElementById("bancoIngreso").value;
@@ -1055,6 +1056,11 @@
     function cerrarModal(id) {
       document.getElementById(id).style.display = "none";
     }
+
+    // Conectar a Supabase
+const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Inicializar la aplicación
     actualizarFiltroBanco();
