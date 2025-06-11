@@ -470,6 +470,10 @@
   </div>
 
   <script>
+        // Conectar a Supabase
+const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     // Datos iniciales
     let bancos = {
       "Banco de Bogotá": 0,
@@ -1056,11 +1060,6 @@
     function cerrarModal(id) {
       document.getElementById(id).style.display = "none";
     }
-
-    // Conectar a Supabase
-const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Inicializar la aplicación
     actualizarFiltroBanco();
