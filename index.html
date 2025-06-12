@@ -468,7 +468,7 @@
       </div>
     </div>
   </div>
-
+  
   <script>
         // Conectar a Supabase
 const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
@@ -572,7 +572,43 @@ async function registrarIngreso() {
   document.getElementById("descripcionIngreso").value = "";
   mostrarAlerta("✅ Ingreso registrado con éxito", "success");
 }
+    
+// Leer los ingresos desde Supabase al cargar la página
 
+async function cargarMovimientosDesdeSupabase() {
+  const { data, error } = await supabase
+    .from('movimientos')
+    .select('*')
+    .order('fecha', { ascending: true });
+
+  if (error) {
+    console.error("❌ Error al cargar movimientos:", error);
+    mostrarAlerta("Error al cargar datos desde Supabase", "error");
+    return;
+  }
+
+  // Reiniciar datos
+  for (const banco in bancos) {
+    bancos[banco] = 0;
+    movimientos[banco] = [];
+  }
+
+  // Procesar cada ingreso
+  data.forEach(mov => {
+    const { tipo, valor, descripcion, fecha, banco_destino } = mov;
+
+    if (tipo === "ingreso") {
+      bancos[banco_destino] += valor;
+      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
+      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+    }
+
+    // Puedes añadir aquí procesamiento de gastos o transferencias más adelante
+  });
+
+  actualizarTotales();
+}
+   
     // Registrar gasto
     function registrarGasto() {
       const banco = document.getElementById("bancoGasto").value;
@@ -1076,9 +1112,12 @@ async function registrarIngreso() {
     function cerrarModal(id) {
       document.getElementById(id).style.display = "none";
     }
-
+    
+(async () => {
+  await cargarMovimientosDesdeSupabase();
     // Inicializar la aplicación
     actualizarFiltroBanco();
+  })();
   </script>
 </body>
 </html>
