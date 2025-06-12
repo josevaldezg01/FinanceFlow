@@ -1146,11 +1146,12 @@ async function transferir() {
     
 (async () => {
   await cargarMovimientosDesdeSupabase();
-    // Inicializar la aplicación
-    actualizarFiltroBanco();
-  })();
-  </script>
-  <!-- Botón discreto para probar conexión Supabase -->
+     // Inicializar la aplicación
+  actualizarFiltroBanco();
+})();
+</script>
+
+<!-- ✅ Botón discreto para probar conexión Supabase -->
 <button
   onclick="probarConexionSupabase()"
   class="fixed bottom-4 right-4 bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded shadow hover:bg-gray-300 z-50"
@@ -1179,5 +1180,6 @@ async function transferir() {
     }
   }
 </script>
+
 </body>
 </html>
