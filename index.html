@@ -1150,5 +1150,34 @@ async function transferir() {
     actualizarFiltroBanco();
   })();
   </script>
+  <!-- Botón discreto para probar conexión Supabase -->
+<button
+  onclick="probarConexionSupabase()"
+  class="fixed bottom-4 right-4 bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded shadow hover:bg-gray-300 z-50"
+  title="Probar conexión Supabase">
+  🔄 Test Supabase
+</button>
+
+<script>
+  async function probarConexionSupabase() {
+    try {
+      const { data, error } = await supabase
+        .from('movimientos')
+        .select('*')
+        .limit(1);
+
+      if (error) {
+        console.error("❌ Supabase sigue sin responder:", error);
+        mostrarAlerta("❌ Supabase aún no responde correctamente", "error");
+      } else {
+        console.log("✅ Supabase respondió correctamente:", data);
+        mostrarAlerta("✅ Conexión a Supabase restaurada", "success");
+      }
+    } catch (err) {
+      console.error("🚨 Error de red o CORS:", err);
+      mostrarAlerta("🚨 Error de red o CORS: Supabase aún no disponible", "error");
+    }
+  }
+</script>
 </body>
 </html>
