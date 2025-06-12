@@ -354,29 +354,29 @@
         </div>
     </section>
 
-   <!-- Filtro por banco -->
-    <section class="mb-8 bg-white p-4 rounded-lg shadow-md">
-      <h2 class="text-xl font-semibold mb-2 flex items-center">
-        <i class="fas fa-filter mr-2 text-indigo-500"></i>Filtrar Movimientos
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Por Banco</label>
-          <select id="filtroBanco" onchange="filtrarHistorialPorBanco()" class="border p-2 rounded w-full">
-            <option value="">-- Todos los Bancos --</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Por Tipo</label>
-          <select id="filtroTipo" onchange="filtrarHistorialPorTipo()" class="border p-2 rounded w-full">
-            <option value="">-- Todos los Tipos --</option>
-            <option value="ingreso">Ingresos</option>
-            <option value="gasto">Gastos</option>
-            <option value="transferencia">Transferencias</option>
-          </select>
-        </div>
-      </div>
-    </section>
+  <!-- Filtro por banco -->
+<section class="mt-6 mb-8 bg-white p-4 rounded-lg shadow-md">
+  <h2 class="text-xl font-semibold mb-2 flex items-center">
+    <i class="fas fa-filter mr-2 text-indigo-500"></i>Filtrar Movimientos
+  </h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Por Banco</label>
+      <select id="filtroBanco" onchange="filtrarHistorialPorBanco()" class="border p-2 rounded w-full">
+        <option value="">-- Todos los Bancos --</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Por Tipo</label>
+      <select id="filtroTipo" onchange="filtrarHistorialPorTipo()" class="border p-2 rounded w-full">
+        <option value="">-- Todos los Tipos --</option>
+        <option value="ingreso">Ingresos</option>
+        <option value="gasto">Gastos</option>
+        <option value="transferencia">Transferencias</option>
+      </select>
+    </div>
+  </div>
+</section>
   
     <!-- Historial -->
     <section class="mb-8 bg-white p-4 rounded-lg shadow-md">
