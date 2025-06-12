@@ -1153,9 +1153,10 @@ async function transferir() {
 
 <!-- ✅ Botón discreto para probar conexión Supabase -->
 <button
-  onclick="alert('Botón visible y funcionando ✅')"
-  style="position: fixed; bottom: 20px; right: 20px; background-color: yellow; color: black; padding: 10px; z-index: 9999; border: 2px solid red;">
-  PRUEBA BOTÓN
+  onclick="probarConexionSupabase()"
+  class="fixed bottom-4 right-4 bg-yellow-300 text-black text-sm px-4 py-2 rounded shadow z-50 border-2 border-red-600"
+  title="Probar conexión Supabase">
+  🔄 Test Supabase
 </button>
 
 <script>
