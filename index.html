@@ -645,43 +645,60 @@ async function cargarMovimientosDesdeSupabase() {
       mostrarAlerta("Gasto registrado con éxito", "success");
     }
 
-    // Transferir entre cuentas
-    function transferir() {
-      const desde = document.getElementById("desdeBanco").value;
-      const hacia = document.getElementById("haciaBanco").value;
-      const valor = Number(document.getElementById("valorTransferencia").value);
+// Transferir entre cuentas
+async function transferir() {
+  const desde = document.getElementById("desdeBanco").value;
+  const hacia = document.getElementById("haciaBanco").value;
+  const valor = Number(document.getElementById("valorTransferencia").value);
 
-      if (!desde || !hacia || !valor) {
-        mostrarAlerta("Por favor completa todos los campos", "error");
-        return;
-      }
+  if (!desde || !hacia || !valor) {
+    mostrarAlerta("Por favor completa todos los campos", "error");
+    return;
+  }
 
-      if (desde === hacia) {
-        mostrarAlerta("No puedes transferir al mismo banco", "error");
-        return;
-      }
+  if (desde === hacia) {
+    mostrarAlerta("No puedes transferir al mismo banco", "error");
+    return;
+  }
 
-      // Verificar si hay suficiente saldo en el banco de origen
-      if (valor > bancos[desde]) {
-        mostrarAlerta(`No tienes suficiente saldo en ${desde} para realizar esta transferencia. Saldo disponible: ${formatoMoneda(bancos[desde])}`, "error");
-        return;
-      }
+  if (valor > bancos[desde]) {
+    mostrarAlerta(`No tienes suficiente saldo en ${desde} para realizar esta transferencia. Saldo disponible: ${formatoMoneda(bancos[desde])}`, "error");
+    return;
+  }
 
-      bancos[desde] -= valor;
-      bancos[hacia] += valor;
-            
-      const fecha = new Date().toLocaleString();
-      movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
-      movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
-            
-      agregarHistorial(`Transferencia de ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia");
-      actualizarTotales();
-            
-      // Limpiar campo
-      document.getElementById("valorTransferencia").value = "";
-            
-      mostrarAlerta("Transferencia realizada con éxito", "success");
+  const descripcion = `Transferencia de ${desde} a ${hacia}`;
+  const fecha = new Date().toISOString();
+
+  // Guardar en Supabase
+  const { error } = await supabase.from('movimientos').insert([
+    {
+      tipo: "transferencia",
+      valor: valor,
+      descripcion: descripcion,
+      banco_origen: desde,
+      banco_destino: hacia,
+      fecha: fecha
     }
+  ]);
+
+  if (error) {
+    console.error("❌ Error al guardar transferencia:", error);
+    mostrarAlerta("❌ No se pudo guardar la transferencia", "error");
+    return;
+  }
+
+  // Actualizar datos locales
+  bancos[desde] -= valor;
+  bancos[hacia] += valor;
+  movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
+  movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
+
+  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia");
+  actualizarTotales();
+
+  document.getElementById("valorTransferencia").value = "";
+  mostrarAlerta("✅ Transferencia realizada con éxito", "success");
+}
 
     // Agregar movimiento al historial
     function agregarHistorial(texto, banco, tipo) {
