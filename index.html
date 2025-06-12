@@ -623,36 +623,54 @@ async function cargarMovimientosDesdeSupabase() {
   actualizarTotales();
 }
 
-    // Registrar gasto
-    function registrarGasto() {
-      const banco = document.getElementById("bancoGasto").value;
-      const valor = Number(document.getElementById("valorGasto").value);
-      const desc = document.getElementById("descripcionGasto").value;
+// Registrar gasto
+async function registrarGasto() {
+  const banco = document.getElementById("bancoGasto").value;
+  const valor = Number(document.getElementById("valorGasto").value);
+  const desc = document.getElementById("descripcionGasto").value;
 
-      if (!banco || !valor) {
-        mostrarAlerta("Por favor completa todos los campos", "error");
-        return;
-      }
+  if (!banco || !valor) {
+    mostrarAlerta("Por favor completa todos los campos", "error");
+    return;
+  }
 
-      // Verificar si hay suficiente saldo en el banco
-      if (valor > bancos[banco]) {
-        mostrarAlerta(`No tienes suficiente saldo en ${banco} para realizar este gasto. Saldo disponible: ${formatoMoneda(bancos[banco])}`, "error");
-        return;
-      }
+  // Verificar si hay suficiente saldo en el banco
+  if (valor > bancos[banco]) {
+    mostrarAlerta(`No tienes suficiente saldo en ${banco} para realizar este gasto. Saldo disponible: ${formatoMoneda(bancos[banco])}`, "error");
+    return;
+  }
 
-      bancos[banco] -= valor;
-      const fecha = new Date().toLocaleString();
-      movimientos[banco].push({ tipo: "gasto", valor, desc, fecha, banco });
-            
-      agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto");
-      actualizarTotales();
-            
-      // Limpiar campos
-      document.getElementById("valorGasto").value = "";
-      document.getElementById("descripcionGasto").value = "";
-            
-      mostrarAlerta("Gasto registrado con éxito", "success");
+  const fecha = new Date().toISOString();
+
+  // Guardar en Supabase
+  const { error } = await supabase.from('movimientos').insert([
+    {
+      tipo: "gasto",
+      valor: valor,
+      descripcion: desc,
+      banco_destino: banco,
+      fecha: fecha
     }
+  ]);
+
+  if (error) {
+    console.error("❌ Error al guardar el gasto en Supabase:", error);
+    mostrarAlerta("❌ Error al guardar el gasto en la base de datos", "error");
+    return;
+  }
+
+  // Actualizar en memoria y en pantalla
+  bancos[banco] -= valor;
+  movimientos[banco].push({ tipo: "gasto", valor, desc, fecha, banco });
+  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto");
+  actualizarTotales();
+
+  // Limpiar campos
+  document.getElementById("valorGasto").value = "";
+  document.getElementById("descripcionGasto").value = "";
+
+  mostrarAlerta("✅ Gasto registrado con éxito", "success");
+}
 
 // Transferir entre cuentas
 async function transferir() {
