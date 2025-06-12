@@ -578,8 +578,7 @@ async function registrarIngreso() {
   mostrarAlerta("✅ Ingreso registrado con éxito", "success");
 }
     
-// Leer los ingresos desde Supabase al cargar la página
-
+// Leer los movimientos desde Supabase al cargar la página
 async function cargarMovimientosDesdeSupabase() {
   const { data, error } = await supabase
     .from('movimientos')
@@ -592,15 +591,15 @@ async function cargarMovimientosDesdeSupabase() {
     return;
   }
 
-  // Reiniciar datos
+  // Reiniciar datos locales
   for (const banco in bancos) {
     bancos[banco] = 0;
     movimientos[banco] = [];
   }
 
-  // Procesar cada ingreso
+  // Procesar cada movimiento
   data.forEach(mov => {
-    const { tipo, valor, descripcion, fecha, banco_destino } = mov;
+    const { tipo, valor, descripcion, fecha, banco_origen, banco_destino } = mov;
 
     if (tipo === "ingreso") {
       bancos[banco_destino] += valor;
@@ -608,12 +607,22 @@ async function cargarMovimientosDesdeSupabase() {
       agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
     }
 
-    // Puedes añadir aquí procesamiento de gastos o transferencias más adelante
+    else if (tipo === "transferencia") {
+      bancos[banco_origen] -= valor;
+      bancos[banco_destino] += valor;
+
+      movimientos[banco_origen].push({ tipo, valor, desc: descripcion, fecha, banco: banco_origen });
+      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
+
+      agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo);
+    }
+
+    // Puedes agregar aquí los gastos después
   });
 
   actualizarTotales();
 }
-   
+
     // Registrar gasto
     function registrarGasto() {
       const banco = document.getElementById("bancoGasto").value;
