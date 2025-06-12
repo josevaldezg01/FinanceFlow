@@ -617,7 +617,18 @@ async function cargarMovimientosDesdeSupabase() {
       agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo);
     }
 
-    // Puedes agregar aquí los gastos después
+    else if (tipo === "gasto") {
+  bancos[banco_destino] -= valor;
+  movimientos[banco_destino].push({
+    tipo,
+    valor,
+    desc: descripcion,
+    fecha,
+    banco: banco_destino
+  });
+  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+}
+
   });
 
   actualizarTotales();
