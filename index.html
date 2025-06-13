@@ -598,7 +598,7 @@ async function registrarIngreso() {
   // Actualizar localmente
   bancos[banco] += valor;
   movimientos[banco].push({ tipo: "ingreso", valor, desc, categoria, fecha, banco });
-  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
+  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso", categoria);
   actualizarTotales();
 
   // Limpiar campos
@@ -635,7 +635,7 @@ async function cargarMovimientosDesdeSupabase() {
     if (tipo === "ingreso") {
       bancos[banco_destino] += valor;
       movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
-      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria);
     }
 
     else if (tipo === "transferencia") {
@@ -658,7 +658,7 @@ async function cargarMovimientosDesdeSupabase() {
     fecha,
     banco: banco_destino
   });
-  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
+  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria);
 }
 
   });
@@ -707,7 +707,7 @@ async function registrarGasto() {
   // Actualizar en memoria y en pantalla
   bancos[banco] -= valor;
   movimientos[banco].push({ tipo: "gasto", valor, desc, categoria, fecha, banco });
-  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto");
+  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto", categoria);
   actualizarTotales();
 
   // Limpiar campos
@@ -774,28 +774,28 @@ async function transferir() {
 }
 
     // Agregar movimiento al historial
-    function agregarHistorial(texto, banco, tipo) {
-      const div = document.createElement("div");
-      div.className = `movement-item p-3 rounded ${tipo}`;
-      div.dataset.banco = banco;
-      div.dataset.tipo = tipo;
-            
-      const fecha = new Date().toLocaleString();
-            
-      div.innerHTML = `
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="font-medium">${texto}</p>
-            <p class="text-xs text-gray-500">${fecha}</p>
-          </div>
-          <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
-      `;
-            
-      document.getElementById("historial").prepend(div);
-    }
+   function agregarHistorial(texto, banco, tipo, categoria = "") {
+  const div = document.createElement("div");
+  div.className = `movement-item p-3 rounded ${tipo}`;
+  div.dataset.banco = banco;
+  div.dataset.tipo = tipo;
+
+  const fecha = new Date().toLocaleString();
+
+  div.innerHTML = `
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="font-medium">${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ''}</p>
+        <p class="text-xs text-gray-500">${fecha}</p>
+      </div>
+      <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
+        <i class="fas fa-trash-alt"></i>
+      </button>
+    </div>
+  `;
+
+  document.getElementById("historial").prepend(div);
+}
 
     // Filtrar historial por banco
     function filtrarHistorialPorBanco() {
