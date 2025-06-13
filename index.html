@@ -265,67 +265,94 @@
       </button>
     </section>
 
-    <!-- Registrar Movimiento -->
-    <section class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-xl font-semibold mb-4 flex items-center">
-        <i class="fas fa-plus-circle mr-2 text-indigo-500"></i>Registrar Movimiento
-      </h2>
-            
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Agregar Ingreso -->
-        <div class="border border-green-200 rounded-lg p-4 bg-green-50">
-          <h3 class="font-semibold text-green-700 mb-3 flex items-center">
-            <i class="fas fa-plus-circle mr-2"></i>Nuevo Ingreso
-          </h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
-              <select id="bancoIngreso" class="border p-2 rounded w-full"></select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-                <input type="number" id="valorIngreso" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-              <input type="text" id="descripcionIngreso" placeholder="Ej: Salario" class="border p-2 rounded w-full" />
-            </div>
-            <button onclick="registrarIngreso()" class="w-full bg-green-600 hover:bg-green-7text-white py-2 px-4 rounded flex items-center justify-center">
-              <i class="fas fa-check-circle mr-2"></i>Registrar Ingreso
-            </button>
+   <!-- Registrar Movimiento -->
+<section class="bg-white p-6 rounded-lg shadow-md">
+  <h2 class="text-xl font-semibold mb-4 flex items-center">
+    <i class="fas fa-plus-circle mr-2 text-indigo-500"></i>Registrar Movimiento
+  </h2>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Agregar Ingreso -->
+    <div class="border border-green-200 rounded-lg p-4 bg-green-50">
+      <h3 class="font-semibold text-green-700 mb-3 flex items-center">
+        <i class="fas fa-plus-circle mr-2"></i>Nuevo Ingreso
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
+          <select id="bancoIngreso" class="border p-2 rounded w-full"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input type="number" id="valorIngreso" placeholder="0" class="pl-8 border p-2 rounded w-full" />
           </div>
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <input type="text" id="descripcionIngreso" placeholder="Ej: Salario" class="border p-2 rounded w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+          <select id="categoriaIngreso" class="border p-2 rounded w-full">
+            <option value="">-- Selecciona una categoría --</option>
+            <option value="Salario">Salario</option>
+            <option value="Venta de cuentas Netfilix/Prime/Max">Venta de cuentas Netfilix/Prime/Max</option>
+            <option value="Reembolso prestamos">Reembolso prestamos</option>
+            <option value="Driver">Driver</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <button onclick="registrarIngreso()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center justify-center">
+          <i class="fas fa-check-circle mr-2"></i>Registrar Ingreso
+        </button>
+      </div>
+    </div>
 
-        <!-- Agregar Gasto -->
-        <div class="border border-red-200 rounded-lg p-4 bg-red-50">
-          <h3 class="font-semibold text-red-700 mb-3 flex items-center">
-            <i class="fas fa-minus-circle mr-2"></i>Nuevo Gasto
-          </h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Banco Origen</label>
-              <select id="bancoGasto" class="border p-2 rounded w-full"></select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-                <input type="number" id="valorGasto" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-              <input type="text" id="descripcionGasto" placeholder="Ej: Supermercado" class="border p-2 rounded w-full" />
-            </div>
-            <button onclick="registrarGasto()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded flex items-center justify-center">
-              <i class="fas fa-check-circle mr-2"></i>Registrar Gasto
-            </button>
+    <!-- Agregar Gasto -->
+    <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+      <h3 class="font-semibold text-red-700 mb-3 flex items-center">
+        <i class="fas fa-minus-circle mr-2"></i>Nuevo Gasto
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Banco Origen</label>
+          <select id="bancoGasto" class="border p-2 rounded w-full"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input type="number" id="valorGasto" placeholder="0" class="pl-8 border p-2 rounded w-full" />
           </div>
         </div>
-
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <input type="text" id="descripcionGasto" placeholder="Ej: Supermercado" class="border p-2 rounded w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+          <select id="categoriaGasto" class="border p-2 rounded w-full">
+            <option value="">-- Selecciona una categoría --</option>
+            <option value="Préstamos">Préstamos</option>
+            <option value="Tarjetas de crédito">Tarjetas de crédito</option>
+            <option value="Arriendo">Arriendo</option>
+            <option value="Almuerzo">Almuerzo</option>
+            <option value="Reparaciones moto">Reparaciones moto</option>
+            <option value="Pago de cuentas Netfilix/Prime/Max">Pago de cuentas Netfilix/Prime/Max</option>
+            <option value="Comida">Comida</option>
+            <option value="Vivienda">Vivienda</option>
+            <option value="Consumibles moto">Consumibles moto</option>
+            <option value="Mecato">Mecato</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <button onclick="registrarGasto()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded flex items-center justify-center">
+          <i class="fas fa-check-circle mr-2"></i>Registrar Gasto
+        </button>
+      </div>
+    </div>
         <!-- Transferencia -->
         <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
           <h3 class="font-semibold text-blue-700 mb-3 flex items-center">
