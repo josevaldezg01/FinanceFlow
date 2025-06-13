@@ -564,13 +564,14 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       inicializarGraficos();
     }
     
-    // Registrar ingreso
+// Registrar ingreso
 async function registrarIngreso() {
   const banco = document.getElementById("bancoIngreso").value;
   const valor = Number(document.getElementById("valorIngreso").value);
   const desc = document.getElementById("descripcionIngreso").value;
+  const categoria = document.getElementById("categoriaIngreso").value;
 
-  if (!banco || !valor || !desc) {
+  if (!banco || !valor || !desc || !categoria) {
     mostrarAlerta("Por favor completa todos los campos", "error");
     return;
   }
@@ -582,6 +583,7 @@ async function registrarIngreso() {
       tipo: "ingreso",
       valor: valor,
       descripcion: desc,
+      categoria: categoria,
       banco_destino: banco,
       fecha: fecha
     }
@@ -593,15 +595,17 @@ async function registrarIngreso() {
     return;
   }
 
-  // Actualizar localmente (opcional, ya que puedes recargar desde Supabase)
+  // Actualizar localmente
   bancos[banco] += valor;
-  movimientos[banco].push({ tipo: "ingreso", valor, desc, fecha, banco });
+  movimientos[banco].push({ tipo: "ingreso", valor, desc, categoria, fecha, banco });
   agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso");
   actualizarTotales();
 
   // Limpiar campos
   document.getElementById("valorIngreso").value = "";
   document.getElementById("descripcionIngreso").value = "";
+  document.getElementById("categoriaIngreso").value = "";
+
   mostrarAlerta("✅ Ingreso registrado con éxito", "success");
 }
     
@@ -666,8 +670,9 @@ async function registrarGasto() {
   const banco = document.getElementById("bancoGasto").value;
   const valor = Number(document.getElementById("valorGasto").value);
   const desc = document.getElementById("descripcionGasto").value;
+  const categoria = document.getElementById("categoriaGasto").value;
 
-  if (!banco || !valor) {
+  if (!banco || !valor || !categoria) {
     mostrarAlerta("Por favor completa todos los campos", "error");
     return;
   }
@@ -686,6 +691,7 @@ async function registrarGasto() {
       tipo: "gasto",
       valor: valor,
       descripcion: desc,
+      categoria: categoria,
       banco_destino: banco,
       fecha: fecha
     }
@@ -699,13 +705,14 @@ async function registrarGasto() {
 
   // Actualizar en memoria y en pantalla
   bancos[banco] -= valor;
-  movimientos[banco].push({ tipo: "gasto", valor, desc, fecha, banco });
+  movimientos[banco].push({ tipo: "gasto", valor, desc, categoria, fecha, banco });
   agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto");
   actualizarTotales();
 
   // Limpiar campos
   document.getElementById("valorGasto").value = "";
   document.getElementById("descripcionGasto").value = "";
+  document.getElementById("categoriaGasto").value = "";
 
   mostrarAlerta("✅ Gasto registrado con éxito", "success");
 }
