@@ -381,25 +381,46 @@
         </div>
     </section>
 
-  <!-- Filtro por banco -->
+<!-- Filtro por banco, tipo y categoría -->
 <section class="mt-6 mb-8 bg-white p-4 rounded-lg shadow-md">
   <h2 class="text-xl font-semibold mb-2 flex items-center">
     <i class="fas fa-filter mr-2 text-indigo-500"></i>Filtrar Movimientos
   </h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Por Banco</label>
-      <select id="filtroBanco" onchange="filtrarHistorialPorBanco()" class="border p-2 rounded w-full">
+      <select id="filtroBanco" onchange="aplicarFiltros()" class="border p-2 rounded w-full">
         <option value="">-- Todos los Bancos --</option>
       </select>
     </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Por Tipo</label>
-      <select id="filtroTipo" onchange="filtrarHistorialPorTipo()" class="border p-2 rounded w-full">
+      <select id="filtroTipo" onchange="aplicarFiltros()" class="border p-2 rounded w-full">
         <option value="">-- Todos los Tipos --</option>
         <option value="ingreso">Ingresos</option>
         <option value="gasto">Gastos</option>
         <option value="transferencia">Transferencias</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Por Categoría</label>
+      <select id="filtroCategoria" onchange="aplicarFiltros()" class="border p-2 rounded w-full">
+        <option value="">-- Todas las Categorías --</option>
+        <option value="Salario">Salario</option>
+        <option value="Driver">Driver</option>
+        <option value="Venta de cuentas Netfilix/Prime/Max">Venta de cuentas Netfilix/Prime/Max</option>
+        <option value="Reembolso prestamos">Reembolso prestamos</option>
+        <option value="Otros ingresos">Otros ingresos</option>
+        <option value="Arriendo">Arriendo</option>
+        <option value="Almuerzo">Almuerzo</option>
+        <option value="Reparaciones moto">Reparaciones moto</option>
+        <option value="Pago de cuentas Netfilix/Prime/Max">Pago de cuentas Netfilix/Prime/Max</option>
+        <option value="Comida">Comida</option>
+        <option value="Vivienda">Vivienda</option>
+        <option value="Consumibles moto">Consumibles moto</option>
+        <option value="Mecato">Mecato</option>
+        <option value="Prestamos">Prestamos</option>
+        <option value="Tarjetas de crédito">Tarjetas de crédito</option>
       </select>
     </div>
   </div>
@@ -773,19 +794,22 @@ async function transferir() {
   mostrarAlerta("✅ Transferencia realizada con éxito", "success");
 }
 
-    // Agregar movimiento al historial
-   function agregarHistorial(texto, banco, tipo, categoria = "") {
+  // Agregar movimiento al historial
+function agregarHistorial(texto, banco, tipo, categoria = "") {
   const div = document.createElement("div");
   div.className = `movement-item p-3 rounded ${tipo}`;
   div.dataset.banco = banco;
   div.dataset.tipo = tipo;
+  div.dataset.categoria = categoria || ""; // ← Esto es lo nuevo
 
   const fecha = new Date().toLocaleString();
 
   div.innerHTML = `
     <div class="flex justify-between items-start">
       <div>
-        <p class="font-medium">${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ''}</p>
+        <p class="font-medium">
+          ${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ""}
+        </p>
         <p class="text-xs text-gray-500">${fecha}</p>
       </div>
       <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
@@ -797,32 +821,23 @@ async function transferir() {
   document.getElementById("historial").prepend(div);
 }
 
-    // Filtrar historial por banco
-    function filtrarHistorialPorBanco() {
-      const filtro = document.getElementById("filtroBanco").value;
-      const historial = document.getElementById("historial").children;
-            
-      for (const item of historial) {
-        const mostrar = (filtro === "" || item.dataset.banco === filtro) &&
-                        (document.getElementById("filtroTipo").value === "" ||
-                         item.dataset.tipo === document.getElementById("filtroTipo").value);
-        item.style.display = mostrar ? "block" : "none";
-      }
-    }
+// Filtro combinado por banco, tipo y categoría
+function aplicarFiltros() {
+  const filtroBanco = document.getElementById("filtroBanco").value;
+  const filtroTipo = document.getElementById("filtroTipo").value;
+  const filtroCategoria = document.getElementById("filtroCategoria")?.value.toLowerCase() || "";
 
-    // Filtrar historial por tipo
-    function filtrarHistorialPorTipo() {
-      const filtro = document.getElementById("filtroTipo").value;
-      const historial = document.getElementById("historial").children;
-            
-      for (const item of historial) {
-        const mostrar = (filtro === "" || item.dataset.tipo === filtro) &&
-                        (document.getElementById("filtroBanco").value === "" ||
-                         item.dataset.banco === document.getElementById("filtroBanco").value);
-        item.style.display = mostrar ? "block" : "none";
-      }
-    }
+  const historial = document.getElementById("historial").children;
 
+  for (const item of historial) {
+    const bancoOk = filtroBanco === "" || item.dataset.banco === filtroBanco;
+    const tipoOk = filtroTipo === "" || item.dataset.tipo === filtroTipo;
+    const categoriaTexto = item.dataset.categoria ? item.dataset.categoria.toLowerCase() : "";
+    const categoriaOk = filtroCategoria === "" || categoriaTexto === filtroCategoria;
+
+    item.style.display = bancoOk && tipoOk && categoriaOk ? "block" : "none";
+  }
+}
     // Actualizar totales y gráficos
     function actualizarTotales() {
       let ingresos = 0, gastos = 0;
