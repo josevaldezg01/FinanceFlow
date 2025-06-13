@@ -630,11 +630,11 @@ async function cargarMovimientosDesdeSupabase() {
 
   // Procesar cada movimiento
   data.forEach(mov => {
-    const { tipo, valor, descripcion, fecha, banco_origen, banco_destino } = mov;
+  const { tipo, valor, descripcion, categoria, fecha, banco_origen, banco_destino } = mov;
 
     if (tipo === "ingreso") {
       bancos[banco_destino] += valor;
-      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
+      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
       agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo);
     }
 
@@ -642,8 +642,8 @@ async function cargarMovimientosDesdeSupabase() {
       bancos[banco_origen] -= valor;
       bancos[banco_destino] += valor;
 
-      movimientos[banco_origen].push({ tipo, valor, desc: descripcion, fecha, banco: banco_origen });
-      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, fecha, banco: banco_destino });
+      movimientos[banco_origen].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_origen });
+      movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
 
       agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo);
     }
@@ -654,6 +654,7 @@ async function cargarMovimientosDesdeSupabase() {
     tipo,
     valor,
     desc: descripcion,
+    categoria,
     fecha,
     banco: banco_destino
   });
