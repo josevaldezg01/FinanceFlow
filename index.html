@@ -214,65 +214,6 @@
       </div>
     </section>
 
-    <!-- Saldos reales -->
-    <section class="mb-8 bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-xl font-semibold mb-4 flex items-center">
-        <i class="fas fa-calculator mr-2 text-indigo-500"></i>Conciliación Bancaria
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Banco de Bogotá</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realBancoBogota" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-          </div>
-        </div>
-                
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nequi</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realNequi" type="number, placeholder="0" class="pl-8 border p-2 rounded w-full" />
-          </div>
-        </div>
-                
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Daviplata</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realDaviplata" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-          </div>
-        </div>
-                
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Colpatria</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realColpatria" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-          </div>
-        </div>
-                
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Bolsillo</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realBolsillo" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-          </div>
-        </div>
-                
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Efectivo</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-            <input id="realEfectivo" type="number" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-          </div>
-        </div>
-      </div>
-      <button onclick="calcularDescuadre()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center justify-center">
-        <i class="fas fa-search-dollar mr-2"></i>Calcular Descuadre
-      </button>
-    </section>
-
    <!-- Registrar Movimiento -->
 <section class="bg-white p-6 rounded-lg shadow-md">
   <h2 class="text-xl font-semibold mb-4 flex items-center">
@@ -910,38 +851,6 @@ function aplicarFiltros() {
             
       // Actualizar gráficos
       actualizarGraficos();
-    }
-
-    // Calcular descuadre entre saldos reales y registrados
-    function calcularDescuadre() {
-      const reales = {
-        "Banco de Bogotá": Number(document.getElementById("realBancoBogota").value) || 0,
-        "Nequi": Number(document.getElementById("realNequi").value) || 0,
-        "Daviplata": Number(document.getElementById("realDaviplata").value) || 0,
-        "Colpatria": Number(document.getElementById("realColpatria").value) || 0,
-        "Bolsillo Otros Ingresos": Number(document.getElementById("realBolsillo").value) || 0,
-        "Efectivo": Number(document.getElementById("realEfectivo").value) || 0
-      };
-
-      let resultado = "📊 Descuadre Detectado:\n";
-      let hayDescuadre = false;
-            
-      for (const banco in reales) {
-        const real = reales[banco];
-        const registrado = bancos[banco];
-        const diferencia = real - registrado;
-                
-        if (diferencia !== 0) {
-          hayDescuadre = true;
-          resultado += `• ${banco}: ${formatoMoneda(diferencia)}\n`;
-        }
-      }
-
-      if (hayDescuadre) {
-        mostrarAlerta(resultado, "warning");
-      } else {
-        mostrarAlerta("¡Perfecto! No hay descuadres detectados.", "success");
-      }
     }
 
     // Inicializar gráficos
