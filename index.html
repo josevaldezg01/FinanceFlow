@@ -82,6 +82,13 @@
       </button>
     </section>
 
+    <!-- Botón para abrir la sección de Pagos Pendientes -->
+<section class="mb-6 text-right">
+  <button onclick="mostrarPagosPendientes()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
+    <i class="fas fa-clock mr-2"></i>Pagos Pendientes
+  </button>
+</section>
+
     <!-- Saldos por Banco -->
     <section class="mb-8">
       <h2 class="text-xl font-semibold mb-4 flex items-center">
@@ -1255,7 +1262,35 @@ function aplicarFiltros() {
   await cargarMovimientosDesdeSupabase();
      // Inicializar la aplicación
   actualizarFiltroBanco();
-})();
+  
+ // Mostrar sección de Pagos Pendientes
+function mostrarPagosPendientes() {
+  document.getElementById("pantallaPagosPendientes").classList.remove("hidden");
+  // Ocultar secciones principales si quieres
+  document.querySelectorAll("main > section").forEach(sec => sec.classList.add("hidden"));
+}
+
+function cerrarPagosPendientes() {
+  document.getElementById("pantallaPagosPendientes").classList.add("hidden");
+  document.querySelectorAll("main > section").forEach(sec => sec.classList.remove("hidden"));
+}
 </script>
+
+<!-- Pantalla de Pagos Pendientes (inicialmente oculta) -->
+<section id="pantallaPagosPendientes" class="hidden">
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-600">
+      <i class="fas fa-clock mr-2"></i>Pagos Pendientes
+    </h2>
+
+    <!-- Aquí programaremos más adelante el contenido -->
+    <p class="text-gray-700">Aquí aparecerán los pagos pendientes registrados.</p>
+
+    <button onclick="cerrarPagosPendientes()" class="mt-4 text-sm text-blue-600 hover:underline">
+      ← Volver
+    </button>
+  </div>
+</section>
+
 </body>
 </html>
