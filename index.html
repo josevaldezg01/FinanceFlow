@@ -1278,7 +1278,7 @@ function aplicarFiltros() {
   await cargarMovimientosDesdeSupabase();
      // Inicializar la aplicación
   actualizarFiltroBanco();
-  
+  })();
  // Mostrar sección de Pagos Pendientes
 function mostrarPagosPendientes() {
   document.getElementById("pantallaPagosPendientes").classList.remove("hidden");
@@ -1290,7 +1290,7 @@ function cerrarPagosPendientes() {
   document.getElementById("pantallaPagosPendientes").classList.add("hidden");
   document.querySelectorAll("main > section").forEach(sec => sec.classList.remove("hidden"));
 }
-  })();
+
 </script>
 </body>
 </html>
