@@ -64,6 +64,7 @@
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900 p-4 min-h-screen">
+  <main>
   <div class="max-w-6xl mx-auto">
     <header class="mb-8 text-center">
       <h1 class="text-3xl md:text-4xl font-bold mb-2 text-indigo-700">
@@ -533,8 +534,23 @@
       </div>
     </div>
   </div>
-  
+    
+  <!-- Pantalla de Pagos Pendientes (inicialmente oculta) -->
+<section id="pantallaPagosPendientes" class="hidden">
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-600">
+      <i class="fas fa-clock mr-2"></i>Pagos Pendientes
+    </h2>
 
+    <!-- Aquí programaremos más adelante el contenido -->
+    <p class="text-gray-700">Aquí aparecerán los pagos pendientes registrados.</p>
+
+    <button onclick="cerrarPagosPendientes()" class="mt-4 text-sm text-blue-600 hover:underline">
+      ← Volver
+    </button>
+  </div>
+</section>
+</main>
 
   <script>
         // Conectar a Supabase
@@ -1262,7 +1278,7 @@ function aplicarFiltros() {
   await cargarMovimientosDesdeSupabase();
      // Inicializar la aplicación
   actualizarFiltroBanco();
-  })();
+  
  // Mostrar sección de Pagos Pendientes
 function mostrarPagosPendientes() {
   document.getElementById("pantallaPagosPendientes").classList.remove("hidden");
@@ -1274,23 +1290,7 @@ function cerrarPagosPendientes() {
   document.getElementById("pantallaPagosPendientes").classList.add("hidden");
   document.querySelectorAll("main > section").forEach(sec => sec.classList.remove("hidden"));
 }
+  })();
 </script>
-
-<!-- Pantalla de Pagos Pendientes (inicialmente oculta) -->
-<section id="pantallaPagosPendientes" class="hidden">
-  <div class="bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-600">
-      <i class="fas fa-clock mr-2"></i>Pagos Pendientes
-    </h2>
-
-    <!-- Aquí programaremos más adelante el contenido -->
-    <p class="text-gray-700">Aquí aparecerán los pagos pendientes registrados.</p>
-
-    <button onclick="cerrarPagosPendientes()" class="mt-4 text-sm text-blue-600 hover:underline">
-      ← Volver
-    </button>
-  </div>
-</section>
-
 </body>
 </html>
