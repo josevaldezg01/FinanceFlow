@@ -779,20 +779,15 @@ function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   div.className = `movement-item p-3 rounded ${tipo}`;
   div.dataset.banco = banco;
   div.dataset.tipo = tipo;
-  div.dataset.categoria = categoria;
+  if (categoria) div.dataset.categoria = categoria;
 
-  // ✅ Mostrar la fecha desde Supabase si está disponible
-  const fechaMostrada = fecha
-    ? new Date(fecha).toLocaleString("es-CO", { timeZone: "America/Bogota" })
-    : new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+  // Mostrar la fecha recibida en formato Colombia
+  const fechaMostrada = fecha ? new Date(fecha).toLocaleString("es-CO") : new Date().toLocaleString("es-CO");
 
   div.innerHTML = `
     <div class="flex justify-between items-start">
       <div>
-        <p class="font-medium">
-          ${texto}
-          ${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ""}
-        </p>
+        <p class="font-medium">${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ''}</p>
         <p class="text-xs text-gray-500">${fechaMostrada}</p>
       </div>
       <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
