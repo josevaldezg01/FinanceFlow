@@ -599,9 +599,7 @@ if (error) {
 bancos[banco] += valor;
 movimientos[banco].push({ tipo: "ingreso", valor, desc, categoria, fecha, banco });
 
-const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
-
-agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso", categoria, fechaMostrada);
+agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso", categoria, fecha);
 actualizarTotales();
 
   // Limpiar campos
@@ -708,8 +706,7 @@ async function registrarGasto() {
   bancos[banco] -= valor;
   movimientos[banco].push({ tipo: "gasto", valor, desc, categoria, fecha, banco });
 
-  const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
-  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto", categoria, fechaMostrada);
+  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto", categoria, fecha);
 
   actualizarTotales();
 
@@ -765,9 +762,7 @@ async function transferir() {
   movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
   movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
 
-  const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
-
-  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia", "", fechaMostrada);
+  aagregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia", "", fecha);
   actualizarTotales();
 
   document.getElementById("valorTransferencia").value = "";
