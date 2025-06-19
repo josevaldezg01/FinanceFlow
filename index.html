@@ -804,7 +804,8 @@ function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
 function aplicarFiltros() {
   const filtroBanco = document.getElementById("filtroBanco").value;
   const filtroTipo = document.getElementById("filtroTipo").value;
-  const filtroCategoria = document.getElementById("filtroCategoria")?.value.toLowerCase() || "";
+  const filtroCategoriaSelect = document.getElementById("filtroCategoria");
+  const filtroCategoria = filtroCategoriaSelect ? filtroCategoriaSelect.value.toLowerCase() : "";
 
   const historial = document.getElementById("historial").children;
   let total = 0;
