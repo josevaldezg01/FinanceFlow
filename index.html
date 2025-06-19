@@ -598,7 +598,7 @@ async function registrarIngreso() {
   // Actualizar localmente
   bancos[banco] += valor;
   movimientos[banco].push({ tipo: "ingreso", valor, desc, categoria, fecha, banco });
-  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso", categoria);
+  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
   actualizarTotales();
 
   // Limpiar campos
@@ -645,7 +645,7 @@ async function cargarMovimientosDesdeSupabase() {
       movimientos[banco_origen].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_origen });
       movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
 
-      agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo);
+      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
     }
 
     else if (tipo === "gasto") {
@@ -658,7 +658,7 @@ async function cargarMovimientosDesdeSupabase() {
     fecha,
     banco: banco_destino
   });
-  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria);
+  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
 }
 
   });
@@ -707,7 +707,7 @@ async function registrarGasto() {
   // Actualizar en memoria y en pantalla
   bancos[banco] -= valor;
   movimientos[banco].push({ tipo: "gasto", valor, desc, categoria, fecha, banco });
-  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto", categoria);
+  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
   actualizarTotales();
 
   // Limpiar campos
@@ -786,9 +786,7 @@ function agregarHistorial(texto, banco, tipo, categoria = "") {
   div.innerHTML = `
     <div class="flex justify-between items-start">
       <div>
-        <p class="font-medium">
-          ${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ""}
-        </p>
+        <p class="font-medium">${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ''}</p>
         <p class="text-xs text-gray-500">${fecha}</p>
       </div>
       <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
