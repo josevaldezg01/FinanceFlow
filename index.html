@@ -774,20 +774,21 @@ async function transferir() {
 }
 
   // Agregar movimiento al historial
-function agregarHistorial(texto, banco, tipo, categoria = "") {
+function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   const div = document.createElement("div");
   div.className = `movement-item p-3 rounded ${tipo}`;
   div.dataset.banco = banco;
   div.dataset.tipo = tipo;
-  div.dataset.categoria = categoria || ""; // ← Esto es lo nuevo
+  div.dataset.categoria = categoria || "";
 
-  const fecha = new Date().toLocaleString();
+  // Usar la fecha proporcionada o la actual si no hay
+  const fechaMostrada = fecha ? new Date(fecha).toLocaleString() : new Date().toLocaleString();
 
   div.innerHTML = `
     <div class="flex justify-between items-start">
       <div>
         <p class="font-medium">${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ''}</p>
-        <p class="text-xs text-gray-500">${fecha}</p>
+        <p class="text-xs text-gray-500">${fechaMostrada}</p>
       </div>
       <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
         <i class="fas fa-trash-alt"></i>
