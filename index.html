@@ -762,7 +762,7 @@ async function transferir() {
   movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
   movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
 
-  aagregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia", "", fecha);
+  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia", "", fecha);
   actualizarTotales();
 
   document.getElementById("valorTransferencia").value = "";
