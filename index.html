@@ -782,7 +782,17 @@ function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   div.dataset.tipo = tipo;
   if (categoria) div.dataset.categoria = categoria;
 
-  const fechaMostrada = fecha ? new Date(fecha).toLocaleString("es-CO") : new Date().toLocaleString("es-CO");
+  let fechaMostrada = "";
+  try {
+    if (fecha) {
+      const fechaObj = new Date(Date.parse(fecha));
+      fechaMostrada = fechaObj.toLocaleString("es-CO");
+    } else {
+      fechaMostrada = new Date().toLocaleString("es-CO");
+    }
+  } catch {
+    fechaMostrada = "Fecha inválida";
+  }
 
   div.innerHTML = `
     <div class="flex justify-between items-start">
