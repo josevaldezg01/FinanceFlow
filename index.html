@@ -773,22 +773,26 @@ async function transferir() {
   mostrarAlerta("✅ Transferencia realizada con éxito", "success");
 }
 
-  // Agregar movimiento al historial
+ // Agregar movimiento al historial
 function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   const div = document.createElement("div");
   div.className = `movement-item p-3 rounded ${tipo}`;
   div.dataset.banco = banco;
   div.dataset.tipo = tipo;
-  div.dataset.categoria = categoria || "";
+  div.dataset.categoria = categoria;
 
-  // Usar la fecha proporcionada o la actual si no hay
+  // ✅ Mostrar la fecha desde Supabase si está disponible
+  const fechaMostrada = fecha
     ? new Date(fecha).toLocaleString("es-CO", { timeZone: "America/Bogota" })
-  : new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
+    : new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
 
   div.innerHTML = `
     <div class="flex justify-between items-start">
       <div>
-        <p class="font-medium">${texto}${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ''}</p>
+        <p class="font-medium">
+          ${texto}
+          ${categoria ? ` <span class="text-sm text-indigo-600">[${categoria}]</span>` : ""}
+        </p>
         <p class="text-xs text-gray-500">${fechaMostrada}</p>
       </div>
       <button onclick="eliminarMovimiento(this)" class="text-gray-400 hover:text-red-500">
