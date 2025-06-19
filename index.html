@@ -735,7 +735,7 @@ async function transferir() {
   }
 
   const descripcion = `Transferencia de ${desde} a ${hacia}`;
-  const fecha = new Date().toISOString();
+  const fecha = new Date(Date.now() - (5 * 60 * 60 * 1000)).toISOString(); // UTC-5 manual
 
   // Guardar en Supabase
   const { error } = await supabase.from('movimientos').insert([
