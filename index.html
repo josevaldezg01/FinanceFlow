@@ -707,7 +707,10 @@ async function registrarGasto() {
   // Actualizar en memoria y en pantalla
   bancos[banco] -= valor;
   movimientos[banco].push({ tipo: "gasto", valor, desc, categoria, fecha, banco });
-  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
+
+  const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
+
+  agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto", categoria, fechaMostrada);
   actualizarTotales();
 
   // Limpiar campos
