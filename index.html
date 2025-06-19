@@ -576,30 +576,33 @@ async function registrarIngreso() {
     return;
   }
 
-  // Guardar en Supabase
-  const fecha = new Date().toISOString();
-  const { error } = await supabase.from('movimientos').insert([
-    {
-      tipo: "ingreso",
-      valor: valor,
-      descripcion: desc,
-      categoria: categoria,
-      banco_destino: banco,
-      fecha: fecha
-    }
-  ]);
-
-  if (error) {
-    console.error("Error al guardar en Supabase:", error);
-    mostrarAlerta("❌ Error al guardar en la base de datos", "error");
-    return;
+ // Guardar en Supabase
+const fecha = new Date().toISOString();
+const { error } = await supabase.from('movimientos').insert([
+  {
+    tipo: "ingreso",
+    valor: valor,
+    descripcion: desc,
+    categoria: categoria,
+    banco_destino: banco,
+    fecha: fecha
   }
+]);
 
-  // Actualizar localmente
-  bancos[banco] += valor;
-  movimientos[banco].push({ tipo: "ingreso", valor, desc, categoria, fecha, banco });
-  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
-  actualizarTotales();
+if (error) {
+  console.error("Error al guardar en Supabase:", error);
+  mostrarAlerta("❌ Error al guardar en la base de datos", "error");
+  return;
+}
+
+// Actualizar localmente
+bancos[banco] += valor;
+movimientos[banco].push({ tipo: "ingreso", valor, desc, categoria, fecha, banco });
+
+const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
+
+agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "ingreso", categoria, fechaMostrada);
+actualizarTotales();
 
   // Limpiar campos
   document.getElementById("valorIngreso").value = "";
@@ -666,7 +669,7 @@ async function cargarMovimientosDesdeSupabase() {
   actualizarTotales();
 }
 
-// Registrar gasto
+  // Registrar gasto
 async function registrarGasto() {
   const banco = document.getElementById("bancoGasto").value;
   const valor = Number(document.getElementById("valorGasto").value);
@@ -678,15 +681,13 @@ async function registrarGasto() {
     return;
   }
 
-  // Verificar si hay suficiente saldo en el banco
   if (valor > bancos[banco]) {
-    mostrarAlerta(`No tienes suficiente saldo en ${banco} para realizar este gasto. Saldo disponible: ${formatoMoneda(bancos[banco])}`, "error");
+    mostrarAlerta(`No tienes suficiente saldo en ${banco}. Saldo disponible: ${formatoMoneda(bancos[banco])}`, "error");
     return;
   }
 
   const fecha = new Date().toISOString();
 
-  // Guardar en Supabase
   const { error } = await supabase.from('movimientos').insert([
     {
       tipo: "gasto",
@@ -699,18 +700,17 @@ async function registrarGasto() {
   ]);
 
   if (error) {
-    console.error("❌ Error al guardar el gasto en Supabase:", error);
+    console.error("❌ Error al guardar el gasto:", error);
     mostrarAlerta("❌ Error al guardar el gasto en la base de datos", "error");
     return;
   }
 
-  // Actualizar en memoria y en pantalla
   bancos[banco] -= valor;
   movimientos[banco].push({ tipo: "gasto", valor, desc, categoria, fecha, banco });
 
   const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
-
   agregarHistorial(`- ${formatoMoneda(valor)} en ${banco} - ${desc}`, banco, "gasto", categoria, fechaMostrada);
+
   actualizarTotales();
 
   // Limpiar campos
@@ -727,18 +727,13 @@ async function transferir() {
   const hacia = document.getElementById("haciaBanco").value;
   const valor = Number(document.getElementById("valorTransferencia").value);
 
-  if (!desde || !hacia || !valor) {
-    mostrarAlerta("Por favor completa todos los campos", "error");
-    return;
-  }
-
-  if (desde === hacia) {
-    mostrarAlerta("No puedes transferir al mismo banco", "error");
+  if (!desde || !hacia || desde === hacia || !valor) {
+    mostrarAlerta("Por favor completa todos los campos correctamente", "error");
     return;
   }
 
   if (valor > bancos[desde]) {
-    mostrarAlerta(`No tienes suficiente saldo en ${desde} para realizar esta transferencia. Saldo disponible: ${formatoMoneda(bancos[desde])}`, "error");
+    mostrarAlerta(`No tienes suficiente saldo en ${desde}. Saldo disponible: ${formatoMoneda(bancos[desde])}`, "error");
     return;
   }
 
@@ -766,17 +761,20 @@ async function transferir() {
   // Actualizar datos locales
   bancos[desde] -= valor;
   bancos[hacia] += valor;
+
   movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
   movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
 
-  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia");
+  const fechaMostrada = new Date(fecha).toLocaleString("es-CO");
+
+  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia", "", fechaMostrada);
   actualizarTotales();
 
   document.getElementById("valorTransferencia").value = "";
   mostrarAlerta("✅ Transferencia realizada con éxito", "success");
 }
 
- // Agregar movimiento al historial
+// Agregar movimiento al historial
 function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   const div = document.createElement("div");
   div.className = `movement-item p-3 rounded ${tipo}`;
@@ -784,7 +782,6 @@ function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   div.dataset.tipo = tipo;
   if (categoria) div.dataset.categoria = categoria;
 
-  // Mostrar la fecha recibida en formato Colombia
   const fechaMostrada = fecha ? new Date(fecha).toLocaleString("es-CO") : new Date().toLocaleString("es-CO");
 
   div.innerHTML = `
