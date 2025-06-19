@@ -635,7 +635,7 @@ async function cargarMovimientosDesdeSupabase() {
     if (tipo === "ingreso") {
       bancos[banco_destino] += valor;
       movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
-      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria);
+      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
     }
 
     else if (tipo === "transferencia") {
