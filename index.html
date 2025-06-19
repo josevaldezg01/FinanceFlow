@@ -782,7 +782,8 @@ function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   div.dataset.categoria = categoria || "";
 
   // Usar la fecha proporcionada o la actual si no hay
-  const fechaMostrada = fecha ? new Date(fecha).toLocaleString() : new Date().toLocaleString();
+    ? new Date(fecha).toLocaleString("es-CO", { timeZone: "America/Bogota" })
+  : new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" });
 
   div.innerHTML = `
     <div class="flex justify-between items-start">
