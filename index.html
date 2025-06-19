@@ -769,7 +769,6 @@ async function transferir() {
   mostrarAlerta("✅ Transferencia realizada con éxito", "success");
 }
 
-// Agregar movimiento al historial
 function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   const div = document.createElement("div");
   div.className = `movement-item p-3 rounded ${tipo}`;
@@ -780,8 +779,10 @@ function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
   let fechaMostrada = "";
   try {
     if (fecha) {
-      const fechaObj = new Date(Date.parse(fecha));
-      fechaMostrada = fechaObj.toLocaleString("es-CO");
+      const fechaUTC = new Date(fecha);
+      // Ajustar manualmente a UTC-5
+      fechaUTC.setHours(fechaUTC.getHours() - 5);
+      fechaMostrada = fechaUTC.toLocaleString("es-CO");
     } else {
       fechaMostrada = new Date().toLocaleString("es-CO");
     }
