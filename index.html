@@ -1033,89 +1033,97 @@ function aplicarFiltros() {
       mostrarAlerta("Historial exportado como CSV", "success");
     }
 
-    // Cerrar el mes actual
-    function cerrarMes() {
-      if (confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) {
-        const fechaActual = new Date();
-        const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11
-        const año = fechaActual.getFullYear();
-        const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
-                
-        // Calcular ingresos y gastos totales
-        let ingresos = 0, gastos = 0;
-        for (const banco in movimientos) {
-          for (const mov of movimientos[banco]) {
-            if (mov.tipo === "ingreso") ingresos += mov.valor;
-            else if (mov.tipo === "gasto") gastos += mov.valor;
-          }
-        }
-                
-        // Crear copia de los datos actuales
-        const datosMes = {
-          id: Date.now(),
-          mes: mes,
-          año: año,
-          nombreMes: nombreMes,
-          fechaCierre: fechaActual.toLocaleString(),
-          saldos: {...bancos},
-          movimientos: JSON.parse(JSON.stringify(movimientos)), // Deep copy
-          ingresos: ingresos,
-          gastos: gastos,
-          balance: ingresos - gastos
-        };
-                
-        // Guardar en el almacenamiento
-        mesesCerrados.push(datosMes);
-        localStorage.setItem('mesesCerrados', JSON.stringify(mesesCerrados));
-                
-        // Reiniciar los datos para el nuevo mes
-        for (const banco in bancos) {
-          bancos[banco] = 0;
-          movimientos[banco] = [];
-        }
-                
-        // Limpiar el historial visible
-        document.getElementById("historial").innerHTML = "";
-                
-        // Actualizar totales
-        actualizarTotales();
-                
-        mostrarAlerta(`Mes ${nombreMes} cerrado correctamente. Los datos han sido guardados.`, "success");
-      }
-    }
+    async function cerrarMes() {
+  if (!confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) return;
 
-    // Mostrar modal con meses anteriores
-    function mostrarModalMesesAnteriores() {
-      const listaMeses = document.getElementById("listaMeses");
-      listaMeses.innerHTML = "";
-            
-      if (mesesCerrados.length === 0) {
-        listaMeses.innerHTML = '<p class="text-gray-500 text-center py-4">No hay meses cerrados registrados.</p>';
-      } else {
-        // Ordenar por fecha (más reciente primero)
-        mesesCerrados.sort((a, b) => b.id - a.id);
-                
-        for (const mes of mesesCerrados) {
-          const item = document.createElement("div");
-          item.className = "bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-50";
-          item.onclick = () => mostrarDetalleMes(mes);
-                    
-          item.innerHTML = `
-            <div class="flex justify-between items-center">
-              <div>
-                <h3 class="font-semibold">${mes.nombreMes.charAt(0).toUpperCase() + mes.nombreMes.slice(1)} ${mes.año}</h3>
-                <p class="text-sm text-gray-500">Cerrado el ${mes.fechaCierre}</p>
-              </div>
-              <i class="fas fa-chevron-right text-gray-400"></i>
-            </div>
-          `;
-                    
-          listaMeses.appendChild(item);
-        }
-      }
-            
-      document.getElementById("modalMesesAnteriores").style.display = "flex";
+  const fechaActual = new Date();
+  const mes = fechaActual.getMonth() + 1;
+  const año = fechaActual.getFullYear();
+  const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+
+  let ingresos = 0, gastos = 0;
+  for (const banco in movimientos) {
+    for (const mov of movimientos[banco]) {
+      if (mov.tipo === "ingreso") ingresos += mov.valor;
+      else if (mov.tipo === "gasto") gastos += mov.valor;
     }
+  }
+
+  const datosMes = {
+    mes: mes,
+    año: año,
+    nombreMes: nombreMes,
+    fechaCierre: fechaActual.toISOString(),
+    ingresos: ingresos,
+    gastos: gastos,
+    balance: ingresos - gastos,
+    saldos: bancos,
+    movimientos: movimientos,
+    mes_cerrado: `${año}-${String(mes).padStart(2, '0')}`
+  };
+
+  // Guardar en tabla historial_mensual de Supabase
+  const { error } = await supabase.from("historial_mensual").insert([datosMes]);
+  if (error) {
+    console.error("❌ Error al guardar en historial_mensual:", error);
+    mostrarAlerta("❌ No se pudo guardar el mes en Supabase", "error");
+    return;
+  }
+
+  // Borrar estado actual para iniciar nuevo mes
+  for (const banco in bancos) {
+    bancos[banco] = 0;
+    movimientos[banco] = [];
+  }
+
+  document.getElementById("historial").innerHTML = "";
+  actualizarTotales();
+  mostrarAlerta(`✅ Mes ${nombreMes} cerrado y guardado correctamente.`, "success");
+}
+    
+   // Mostrar modal con meses anteriores desde Supabase
+async function mostrarModalMesesAnteriores() {
+  const listaMeses = document.getElementById("listaMeses");
+  listaMeses.innerHTML = "";
+
+  const { data, error } = await supabase
+    .from("historial_mensual")
+    .select("*")
+    .order("fechaCierre", { ascending: false });
+
+  if (error) {
+    console.error("❌ Error al cargar historial mensual:", error);
+    listaMeses.innerHTML = '<p class="text-red-500 text-center py-4">Error al cargar datos</p>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    listaMeses.innerHTML = '<p class="text-gray-500 text-center py-4">No hay meses cerrados registrados.</p>';
+    return;
+  }
+
+  for (const mes of data) {
+    const item = document.createElement("div");
+    item.className = "bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-50";
+    item.onclick = () => mostrarDetalleMes(mes);
+
+    const fechaMostrada = new Date(mes.fechaCierre).toLocaleString("es-CO");
+
+    item.innerHTML = `
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="font-semibold">${mes.nombreMes.charAt(0).toUpperCase() + mes.nombreMes.slice(1)} ${mes.año}</h3>
+          <p class="text-sm text-gray-500">Cerrado el ${fechaMostrada}</p>
+        </div>
+        <i class="fas fa-chevron-right text-gray-400"></i>
+      </div>
+    `;
+
+    listaMeses.appendChild(item);
+  }
+
+  document.getElementById("modalMesesAnteriores").style.display = "flex";
+}
 
     // Mostrar detalle de un mes específico
     function mostrarDetalleMes(mes) {
