@@ -1114,7 +1114,7 @@ async function mostrarModalMesesAnteriores() {
   const { data, error } = await supabase
     .from("historial_mensual")
     .select("*")
-    .order("fechaCierre", { ascending: false });
+    .order("fecha_cierre", { ascending: false });
 
   if (error) {
     console.error("❌ Error al cargar historial mensual:", error);
@@ -1132,7 +1132,7 @@ async function mostrarModalMesesAnteriores() {
     item.className = "bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-50";
     item.onclick = () => mostrarDetalleMes(mes);
 
-    const fechaMostrada = new Date(mes.fechaCierre).toLocaleString("es-CO");
+    const fechaMostrada = new Date(mes.fecha_cierre).toLocaleString("es-CO");
 
     item.innerHTML = `
       <div class="flex justify-between items-center">
