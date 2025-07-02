@@ -1188,57 +1188,46 @@ async function mostrarModalMesesAnteriores() {
       const detalleMovimientos = document.getElementById("detalleMovimientos");
       detalleMovimientos.innerHTML = "";
             
-      // Recolectar todos los movimientos de todos los bancos
-      let todosMovimientos = [];
-      console.log("💬 movimientos recibidos:", mes.movimientos);
-for (const banco in mes.movimientos) {
-  const movimientosDelBanco = mes.movimientos[banco];
-
-  if (!Array.isArray(movimientosDelBanco)) {
-    console.warn(`⚠️ El valor de mes.movimientos[${banco}] no es una lista:`, movimientosDelBanco);
-    continue;
-  }
-
-  for (const mov of movimientosDelBanco) {
-    todosMovimientos.push({
-      ...mov,
-      banco: banco
-    });
-  }
-}
-    
-      // Ordenar por fecha (más reciente primero)
-      todosMovimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            
       // Mostrar movimientos
-      for (const mov of todosMovimientos) {
-        const div = document.createElement("div");
-        div.className = `movement-item p-3 rounded ${mov.tipo}`;
-                
-        let texto = "";
-        if (mov.tipo === "ingreso") {
-          texto = `+ ${formatoMoneda(mov.valor)} en ${mov.banco} - ${mov.desc}`;
-        } else if (mov.tipo === "gasto") {
-          texto = `- ${formatoMoneda(mov.valor)} en ${mov.banco} - ${mov.desc}`;
-        } else {
-          texto = `Transferencia de ${formatoMoneda(mov.valor)} - ${mov.desc}`;
-        }
-                
-        div.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="font-medium">${texto}</p>
-              <p class="text-xs text-gray-500">${mov.fecha}</p>
-            </div>
-          </div>
-        `;
-                
-        detalleMovimientos.appendChild(div);
-      }
-            
-      // Cerrar modal de meses y abrir modal de detalle
-      cerrarModal("modalMesesAnteriores");
-      document.getElementById("modalDetalleMes").style.display = "flex";
+const detalleMovimientos = document.getElementById("detalleMovimientos");
+detalleMovimientos.innerHTML = "";
+
+// Si los movimientos ya vienen como lista plana
+const todosMovimientos = Array.isArray(mes.movimientos) ? [...mes.movimientos] : [];
+
+todosMovimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+for (const mov of todosMovimientos) {
+  const div = document.createElement("div");
+  div.className = `movement-item p-3 rounded ${mov.tipo}`;
+
+  let texto = "";
+  if (mov.tipo === "ingreso") {
+    texto = `+ ${formatoMoneda(mov.valor)} en ${mov.banco_destino} - ${mov.descripcion}`;
+  } else if (mov.tipo === "gasto") {
+    texto = `- ${formatoMoneda(mov.valor)} en ${mov.banco_destino} - ${mov.descripcion}`;
+  } else {
+    texto = `Transferencia de ${formatoMoneda(mov.valor)} de ${mov.banco_origen} a ${mov.banco_destino}`;
+  }
+
+  const fechaMostrada = new Date(mov.fecha).toLocaleString("es-CO");
+
+  div.innerHTML = `
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="font-medium">${texto}</p>
+        <p class="text-xs text-gray-500">${fechaMostrada}</p>
+      </div>
+    </div>
+  `;
+
+  detalleMovimientos.appendChild(div);
+}
+
+// Cerrar modal de meses y abrir modal de detalle
+cerrarModal("modalMesesAnteriores");
+document.getElementById("modalDetalleMes").style.display = "flex";
+
     }
 
     // Cerrar modal
