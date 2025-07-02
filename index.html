@@ -1195,8 +1195,23 @@ async function mostrarModalMesesAnteriores() {
             
       // Recolectar todos los movimientos de todos los bancos
       let todosMovimientos = [];
-      for (const banco in mes.movimientos) {
-        for (const mov of mes.movimientos[banco]) {
+      console.log("💬 movimientos recibidos:", mes.movimientos);
+for (const banco in mes.movimientos) {
+  const movimientosDelBanco = mes.movimientos[banco];
+
+  if (!Array.isArray(movimientosDelBanco)) {
+    console.warn(`⚠️ El valor de mes.movimientos[${banco}] no es una lista:`, movimientosDelBanco);
+    continue;
+  }
+
+  for (const mov of movimientosDelBanco) {
+    todosMovimientos.push({
+      ...mov,
+      banco: banco
+    });
+  }
+}
+
           todosMovimientos.push({
             ...mov,
             banco: banco
