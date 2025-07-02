@@ -1130,7 +1130,20 @@ async function mostrarModalMesesAnteriores() {
   for (const mes of data) {
     const item = document.createElement("div");
     item.className = "bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-50";
-    item.onclick = () => mostrarDetalleMes(mes);
+    item.onclick = () => {
+  // Asegurarse de que mes.movimientos sea un objeto
+  if (typeof mes.movimientos === "string") {
+    try {
+      mes.movimientos = JSON.parse(mes.movimientos);
+    } catch (e) {
+      console.error("❌ Error al convertir movimientos JSON:", e);
+      mostrarAlerta("❌ No se pudieron leer los movimientos de este mes.", "error");
+      return;
+    }
+  }
+
+  mostrarDetalleMes(mes);
+};
 
     const fechaMostrada = new Date(mes.fecha_cierre).toLocaleString("es-CO");
 
