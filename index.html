@@ -1035,75 +1035,70 @@ function aplicarFiltros() {
 
   // Cerrar el mes actual
 async function cerrarMes() {
-  if (!confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) return;
+  if (confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) {
+    const fechaActual = new Date();
+    const mes = fechaActual.getMonth() + 1;
+    const año = fechaActual.getFullYear();
+    const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
 
-  const fechaActual = new Date();
-  const mes = fechaActual.getMonth() + 1;
-  const año = fechaActual.getFullYear();
-  const nombre_mes = fechaActual.toLocaleString('es-ES', { month: 'long' });
-
-  let ingresos = 0, gastos = 0;
-  let movimientosCopia = [];
-  let saldosCopia = { ...bancos };
-
-  // Preparar movimientos para guardar
-  for (const banco in movimientos) {
-    for (const mov of movimientos[banco]) {
-      const movCompleto = {
-        tipo: mov.tipo,
-        valor: mov.valor,
-        descripcion: mov.desc,
-        categoria: mov.categoria || null,
-        fecha: mov.fecha,
-        banco_destino: mov.banco || banco,
-        banco_origen: mov.banco_origen || null
-      };
-
-      movimientosCopia.push(movCompleto);
-
-      if (mov.tipo === "ingreso") ingresos += mov.valor;
-      else if (mov.tipo === "gasto") gastos += mov.valor;
+    // Calcular ingresos y gastos totales
+    let ingresos = 0, gastos = 0;
+    for (const banco in movimientos) {
+      for (const mov of movimientos[banco]) {
+        if (mov.tipo === "ingreso") ingresos += mov.valor;
+        else if (mov.tipo === "gasto") gastos += mov.valor;
+      }
     }
-  }
 
-  // Guardar en tabla historial_mensual en Supabase
-  const { error } = await supabase.from("historial_mensual").insert([
-    {
-      mes_cerrado: `${año}-${mes.toString().padStart(2, "0")}`,
-      nombre_mes: nombre_mes,
-      fecha_cierre: fechaActual.toISOString(),
-      ingresos: ingresos,
-      gastos: gastos,
-      balance: ingresos - gastos,
-      saldos: saldosCopia,
-      movimientos: movimientosCopia
+    // Convertir movimientos por banco a una lista plana
+    const movimientosPlanos = [];
+    for (const banco in movimientos) {
+      for (const mov of movimientos[banco]) {
+        movimientosPlanos.push({
+          ...mov,
+          banco_destino: mov.banco || banco
+        });
+      }
     }
-  ]);
 
-  if (error) {
-    console.error("Error al guardar en historial_mensual:", error);
-    mostrarAlerta("❌ Error al guardar el mes cerrado en la base de datos", "error");
-    return;
+    // Guardar en Supabase
+    const { error } = await supabase.from("historial_mensual").insert([
+      {
+        mes: mes,
+        año: año,
+        nombre_mes: nombreMes,
+        fecha_cierre: fechaActual.toISOString(),
+        ingresos: ingresos,
+        gastos: gastos,
+        balance: ingresos - gastos,
+        saldos: bancos,
+        movimientos: movimientosPlanos
+      }
+    ]);
+
+    if (error) {
+      console.error("❌ Error al guardar en historial_mensual:", error);
+      mostrarAlerta("❌ No se pudo guardar el mes cerrado", "error");
+      return;
+    }
+
+    // Limpiar tabla movimientos
+    const { error: deleteError } = await supabase.from("movimientos").delete().neq("id", 0); // Borra todo
+
+    if (deleteError) {
+      console.error("❌ Error al limpiar tabla movimientos:", deleteError);
+    }
+
+    // Reiniciar estado
+    for (const banco in bancos) {
+      bancos[banco] = 0;
+      movimientos[banco] = [];
+    }
+
+    document.getElementById("historial").innerHTML = "";
+    actualizarTotales();
+    mostrarAlerta(`Mes ${nombreMes} cerrado correctamente.`, "success");
   }
-
-  // Limpiar la tabla de movimientos
-  const { error: deleteError } = await supabase.from("movimientos").delete().neq("id", 0);
-  if (deleteError) {
-    console.error("❌ Error al limpiar movimientos:", deleteError);
-    mostrarAlerta("❌ No se pudieron limpiar los movimientos del mes", "error");
-    return;
-  }
-
-  // Limpiar datos locales
-  for (const banco in bancos) {
-    bancos[banco] = 0;
-    movimientos[banco] = [];
-  }
-
-  document.getElementById("historial").innerHTML = "";
-  actualizarTotales();
-
-  mostrarAlerta(`✅ Mes ${nombre_mes} cerrado correctamente`, "success");
 }
     
    // Mostrar modal con meses anteriores desde Supabase
