@@ -1137,7 +1137,7 @@ async function mostrarModalMesesAnteriores() {
     item.innerHTML = `
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="font-semibold">${mes.nombre_mes.charAt(0).toUpperCase() + mes.nombre_mes.slice(1)} ${mes.año}</h3>
+          <h3 class="font-semibold">${(mes.nombre_mes ?? "Desconocido").charAt(0).toUpperCase() + (mes.nombre_mes ?? "Desconocido").slice(1)} ${mes.año}</h3>
           <p class="text-sm text-gray-500">Cerrado el ${fechaMostrada}</p>
         </div>
         <i class="fas fa-chevron-right text-gray-400"></i>
