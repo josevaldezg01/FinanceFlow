@@ -1206,14 +1206,7 @@ for (const banco in mes.movimientos) {
     });
   }
 }
-
-          todosMovimientos.push({
-            ...mov,
-            banco: banco
-          });
-        }
-      }
-            
+    
       // Ordenar por fecha (más reciente primero)
       todosMovimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             
