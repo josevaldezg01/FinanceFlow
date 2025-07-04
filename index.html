@@ -488,23 +488,6 @@
     </div>
   </div>
     
-  <!-- Modal de Pagos Pendientes -->
-<div id="modalPagosPendientes" class="fixed inset-0 hidden z-50 bg-black bg-opacity-50 flex justify-center items-center">
-  <div class="modal-content max-w-2xl w-full">
-    <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-600">
-      <i class="fas fa-clock mr-2"></i>Pagos Pendientes
-    </h2>
-
-    <div id="listaPagosPendientes" class="space-y-2 max-h-96 overflow-y-auto pr-2">
-      <!-- Los pagos pendientes se cargarán aquí -->
-    </div>
-
-    <button onclick="cerrarModal('modalPagosPendientes')" class="mt-4 text-sm text-blue-600 hover:underline">
-      ← Volver
-    </button>
-  </div>
-</div>
-
   <script>
         // Conectar a Supabase
 const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
@@ -1235,48 +1218,6 @@ function cerrarModal(id) {
   const modal = document.getElementById(id);
 modal.style.display = "none";
 modal.classList.add("hidden");
-}
-
-// Mostrar modal de Pagos Pendientes (como una ventana modal encima del contenido)
-async function mostrarPagosPendientes() {
-  const modal = document.getElementById("modalPagosPendientes");
-  const lista = document.getElementById("listaPagosPendientes");
-
-  // Mostrar el modal solo con Tailwind
-  modal.classList.remove("hidden");
-  lista.innerHTML = "";
-
-  const { data, error } = await supabase
-    .from("pagos_pendientes")
-    .select("*")
-    .order("fecha_vencimiento", { ascending: true });
-
-  if (error) {
-    lista.innerHTML = `<p class="text-red-500">❌ Error al cargar los pagos pendientes</p>`;
-    console.error("❌ Supabase error:", error);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    lista.innerHTML = `<p class="text-gray-600">No hay pagos pendientes registrados.</p>`;
-    return;
-  }
-
-  for (const mov of data) {
-    const fecha = mov.fecha_vencimiento
-      ? new Date(mov.fecha_vencimiento).toLocaleDateString("es-CO")
-      : "Sin fecha";
-
-    const div = document.createElement("div");
-    div.className = "border p-3 rounded shadow-sm bg-yellow-50 mb-2";
-    div.innerHTML = `
-      <p class="font-medium">${mov.descripcion}</p>
-      <p class="text-sm text-gray-600">Valor: ${formatoMoneda(mov.valor)}</p>
-      <p class="text-xs text-gray-500">Categoría: ${mov.categoria || "Sin categoría"}</p>
-      <p class="text-xs text-gray-400">Vence: ${fecha}</p>
-    `;
-    lista.appendChild(div);
-  }
 }
 
 // Inicializar aplicación
