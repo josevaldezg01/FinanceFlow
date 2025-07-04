@@ -1213,19 +1213,68 @@ document.getElementById("modalDetalleMes").style.display = "flex";
 
     }
 
-   // Cerrar modal genérico (ya lo tienes, se conserva)
+  // Cerrar modal genérico (ya lo tienes, se conserva)
 function cerrarModal(id) {
   const modal = document.getElementById(id);
-modal.style.display = "none";
-modal.classList.add("hidden");
+  modal.style.display = "none";
+  modal.classList.add("hidden");
+}
+
+// Función para cargar pagos pendientes
+async function cargarPagosPendientes() {
+  const contenedor = document.getElementById("listaPagosPendientes");
+  contenedor.innerHTML = "<p class='text-gray-500'>Cargando pagos pendientes...</p>";
+
+  const { data, error } = await supabase
+    .from("pagos_pendientes")
+    .select("*")
+    .order("fecha_vencimiento", { ascending: true });
+
+  if (error) {
+    contenedor.innerHTML = `<p class="text-red-500">❌ Error al cargar los pagos pendientes</p>`;
+    console.error("❌ Supabase error:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    contenedor.innerHTML = `<p class="text-gray-600">No hay pagos pendientes registrados.</p>`;
+    return;
+  }
+
+  contenedor.innerHTML = "";
+  for (const mov of data) {
+    const fecha = mov.fecha_vencimiento
+      ? new Date(mov.fecha_vencimiento).toLocaleDateString("es-CO")
+      : "Sin fecha";
+
+    const div = document.createElement("div");
+    div.className = "border p-3 rounded shadow-sm bg-white";
+    div.innerHTML = `
+      <p class="font-medium">${mov.descripcion}</p>
+      <p class="text-sm text-gray-600">Valor: ${formatoMoneda(mov.valor)}</p>
+      <p class="text-xs text-gray-500">Categoría: ${mov.categoria || "Sin categoría"}</p>
+      <p class="text-xs text-gray-400">Vence: ${fecha}</p>
+    `;
+    contenedor.appendChild(div);
+  }
 }
 
 // Inicializar aplicación
 (async () => {
   await cargarMovimientosDesdeSupabase();
   actualizarFiltroBanco();
+  await cargarPagosPendientes(); // 👈 AÑADIR esta línea
 })();
-
 </script>
+    <!-- Sección fija de Pagos Pendientes -->
+<section id="seccionPagosPendientes" class="mt-10 bg-yellow-50 border border-yellow-300 p-6 rounded-lg shadow-md">
+  <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-700">
+    <i class="fas fa-clock mr-2"></i>Pagos Pendientes
+  </h2>
+
+  <div id="listaPagosPendientes" class="space-y-3">
+    <p class="text-gray-500">Cargando pagos pendientes...</p>
+  </div>
+</section>
 </body>
 </html>
