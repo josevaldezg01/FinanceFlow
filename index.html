@@ -1232,7 +1232,9 @@ document.getElementById("modalDetalleMes").style.display = "flex";
 
    // Cerrar modal genérico (ya lo tienes, se conserva)
 function cerrarModal(id) {
-  document.getElementById(id).style.display = "none";
+  const modal = document.getElementById(id);
+modal.style.display = "none";
+modal.classList.add("hidden");
 }
 
 // Mostrar modal de Pagos Pendientes (como una ventana modal encima del contenido)
@@ -1240,7 +1242,8 @@ async function mostrarPagosPendientes() {
   const modal = document.getElementById("modalPagosPendientes");
   const lista = document.getElementById("listaPagosPendientes");
 
-  modal.style.display = "flex";
+  modal.classList.remove("hidden");
+modal.style.display = "flex";
   lista.innerHTML = "";
 
   const { data, error } = await supabase
