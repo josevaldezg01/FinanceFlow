@@ -489,7 +489,7 @@
   </div>
     
   <!-- Modal de Pagos Pendientes -->
-<div id="modalPagosPendientes" class="modal hidden">
+<div id="modalPagosPendientes" class="fixed inset-0 hidden z-50 bg-black bg-opacity-50 flex justify-center items-center">
   <div class="modal-content max-w-2xl w-full">
     <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-600">
       <i class="fas fa-clock mr-2"></i>Pagos Pendientes
@@ -1242,8 +1242,8 @@ async function mostrarPagosPendientes() {
   const modal = document.getElementById("modalPagosPendientes");
   const lista = document.getElementById("listaPagosPendientes");
 
+  // Mostrar el modal solo con Tailwind
   modal.classList.remove("hidden");
-modal.style.display = "flex";
   lista.innerHTML = "";
 
   const { data, error } = await supabase
@@ -1257,7 +1257,7 @@ modal.style.display = "flex";
     return;
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     lista.innerHTML = `<p class="text-gray-600">No hay pagos pendientes registrados.</p>`;
     return;
   }
@@ -1266,8 +1266,9 @@ modal.style.display = "flex";
     const fecha = mov.fecha_vencimiento
       ? new Date(mov.fecha_vencimiento).toLocaleDateString("es-CO")
       : "Sin fecha";
+
     const div = document.createElement("div");
-    div.className = "border p-3 rounded shadow-sm bg-yellow-50";
+    div.className = "border p-3 rounded shadow-sm bg-yellow-50 mb-2";
     div.innerHTML = `
       <p class="font-medium">${mov.descripcion}</p>
       <p class="text-sm text-gray-600">Valor: ${formatoMoneda(mov.valor)}</p>
