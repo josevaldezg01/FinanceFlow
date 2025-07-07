@@ -1438,17 +1438,25 @@ async function cargarPagosPendientes() {
     contenedor.appendChild(categoriaDiv);
   }
 }
-   // Marcar pago como completado y convertirlo en gasto
+ // Marcar pago como completado y convertirlo en gasto
 async function marcarPagoComoCompletado(idPago, valor, banco) {
   if (!banco) {
     mostrarAlerta("Este pago no tiene banco destino asignado", "error");
     return;
   }
+
   if (confirm(`¿Marcar este pago como completado y registrar como gasto en ${banco} por ${formatoMoneda(valor)}?`)) {
     // 1. Registrar como gasto
     const fecha = new Date().toISOString();
-    const descripcion = `Pago completado: ${document.querySelector(`[onclick="marcarPagoComoCompletado(${idPago}, ${valor}, '${banco}')"]`).closest('div').querySelector('p').textContent.trim();
-const { error: gastoError } = await supabase.from('movimientos').insert([
+    
+    // Primero obtenemos el elemento del DOM
+    const pagoElement = document.querySelector(`[onclick*="marcarPagoComoCompletado(${idPago}"]`);
+    const descripcionElement = pagoElement ? pagoElement.closest('div').querySelector('p') : null;
+    const descripcion = descripcionElement 
+      ? `Pago completado: ${descripcionElement.textContent.trim()}`
+      : `Pago completado (ID: ${idPago})`;
+    
+    const { error: gastoError } = await supabase.from('movimientos').insert([
       {
         tipo: "gasto",
         valor: valor,
@@ -1457,12 +1465,14 @@ const { error: gastoError } = await supabase.from('movimientos').insert([
         banco_destino: banco,
         fecha: fecha
       }
-    ]);                                          
-  if (gastoError) {
+    ]);
+
+    if (gastoError) {
       console.error("Error al registrar gasto:", gastoError);
       mostrarAlerta("Error al registrar el gasto", "error");
       return;
-    }                                          
+    }
+
     // 2. Actualizar pago como completado
     const { error } = await supabase
       .from('pagos_pendientes')
