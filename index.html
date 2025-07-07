@@ -1415,6 +1415,9 @@ async function cargarPagosPendientes() {
       const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
       const estaVencido = fechaVenc && fechaVenc < hoy;
       
+      // Escapar comillas simples en la descripción
+      const descripcionSegura = pago.descripcion.replace(/'/g, "\\'");
+      
       const pagoDiv = document.createElement("div");
       pagoDiv.className = `border p-3 rounded-lg shadow-sm bg-white ${estaVencido ? 'border-red-200' : ''}`;
       pagoDiv.innerHTML = `
@@ -1425,15 +1428,15 @@ async function cargarPagosPendientes() {
               <span class="mr-3">${formatoMoneda(pago.valor)}</span>
               <i class="fas fa-university mr-1 text-xs"></i>
               <span class="mr-3">${pago.banco_destino || 'Sin banco'}</span>
-              ${fechaVencimiento && `<i class="fas fa-calendar-day mr-1 text-xs"></i>
-              <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>`}
+              ${fechaVencimiento ? `<i class="fas fa-calendar-day mr-1 text-xs"></i>
+              <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>` : ''}
             </div>
           </div>
           <div class="flex space-x-2 ml-4">
             <button onclick="editarPagoPendiente(${pago.id})" class="text-blue-500 hover:text-blue-700 p-1">
               <i class="fas fa-edit"></i>
             </button>
-            <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
+            <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${descripcionSegura}', '${pago.categoria || ''}', '${pago.banco_destino || ''}')" 
               class="text-green-500 hover:text-green-700 p-1">
               <i class="fas fa-check-circle"></i>
             </button>
