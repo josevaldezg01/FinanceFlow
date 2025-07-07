@@ -544,9 +544,12 @@
       </div>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
-        <select id="pagoBanco" class="border p-2 rounded w-full"></select>
-      </div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
+  <select id="pagoBanco" class="border p-2 rounded w-full">
+    <option value="" selected>-- Elegir al realizar el pago (opcional) --</option>
+    <!-- Las opciones de bancos se llenarán dinámicamente -->
+  </select>
+</div>
       
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento</label>
@@ -1294,15 +1297,16 @@ function cerrarModal(id) {
 
   // Mostrar modal para agregar pago pendiente
 function mostrarModalAgregarPago() {
-  // Llenar select de bancos
+  // Llenar select de bancos CON OPCIÓN POR DEFECTO
   const selectBanco = document.getElementById("pagoBanco");
-  selectBanco.innerHTML = '';
+  selectBanco.innerHTML = '<option value="" selected>-- Elegir al pagar (opcional) --</option>'; // Nueva línea
+  
   for (const banco in bancos) {
     const opt = document.createElement("option");
     opt.value = banco;
     opt.textContent = banco;
     selectBanco.appendChild(opt);
-  }  
+  } 
   // Establecer fecha mínima como hoy
   document.getElementById("pagoFechaVencimiento").min = new Date().toISOString().split("T")[0];
   
@@ -1314,11 +1318,12 @@ async function agregarPagoPendiente() {
   const descripcion = document.getElementById("pagoDescripcion").value;
   const valor = Number(document.getElementById("pagoValor").value);
   const categoria = document.getElementById("pagoCategoria").value;
-  const banco = document.getElementById("pagoBanco").value;
+  const banco = document.getElementById("pagoBanco").value; // Puede ser "" (vacío)
   const fechaVencimiento = document.getElementById("pagoFechaVencimiento").value;
 
-  if (!descripcion || !valor || !categoria || !banco) {
-    mostrarAlerta("Por favor completa todos los campos obligatorios", "error");
+  // Elimina la validación de !banco (cambia esta condición)
+  if (!descripcion || !valor || !categoria) { // ← Banco ya no es obligatorio
+    mostrarAlerta("Por favor completa descripción, valor y categoría", "error");
     return;
   }
 
@@ -1327,7 +1332,7 @@ async function agregarPagoPendiente() {
       descripcion,
       valor,
       categoria,
-      banco_destino: banco,
+      banco_destino: banco || null, // Guarda NULL si no se seleccionó banco
       fecha_vencimiento: fechaVencimiento || null,
       completado: false
     }
