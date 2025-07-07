@@ -1451,6 +1451,12 @@ async function cargarPagosPendientes() {
 }
       
       // En la función cargarPagosPendientes(), actualiza el HTML de cada pago:
+const fechaVencimiento = pago.fecha_vencimiento 
+  ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
+  : "Sin fecha";
+
+const estaVencido = pago.fecha_vencimiento && new Date(pago.fecha_vencimiento) < new Date();
+
 const pagoDiv = document.createElement("div");
 pagoDiv.className = `border p-3 rounded-lg shadow-sm bg-white ${estaVencido ? 'border-red-200 bg-red-50' : ''}`;
 pagoDiv.innerHTML = `
@@ -1461,8 +1467,8 @@ pagoDiv.innerHTML = `
     </div>
     <div class="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-x-3 gap-y-1">
       <i class="fas fa-university mr-1 text-xs"></i>
-      <span class="mr-3">${pago.banco_destino || 'Sin banco asignado'}</span>
-      ${fechaVencimiento ? `
+      <span>${pago.banco_destino || 'Sin banco asignado'}</span>
+      ${fechaVencimiento !== "Sin fecha" ? `
         <i class="fas fa-calendar-day mr-1 text-xs"></i>
         <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
       ` : ''}
@@ -1483,7 +1489,7 @@ pagoDiv.innerHTML = `
     </button>
   </div>
 `;
-pagosContainer.appendChild(pagoDiv);  // Esta línea debe mantenerse después
+pagosContainer.appendChild(pagoDiv);
 
     async function editarPagoPendiente(idPago) {
   // Obtener datos actuales del pago
