@@ -488,16 +488,77 @@
     </div>
   </div>
 
-    <!-- Sección fija de Pagos Pendientes -->
-<section id="seccionPagosPendientes" class="mt-10 bg-yellow-50 border border-yellow-300 p-6 rounded-lg shadow-md">
-  <h2 class="text-xl font-semibold mb-4 flex items-center text-yellow-700">
-    <i class="fas fa-clock mr-2"></i>Pagos Pendientes
-  </h2>
+<!-- Sección de Pagos Pendientes - Modificada -->
+<section id="seccionPagosPendientes" class="mt-10 bg-white border border-gray-200 p-6 rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold flex items-center text-indigo-700">
+      <i class="fas fa-clock mr-2"></i>Pagos Pendientes
+    </h2>
+    <button onclick="mostrarModalAgregarPago()" class="bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-3 rounded text-sm flex items-center">
+      <i class="fas fa-plus mr-1"></i>Agregar Pago
+    </button>
+  </div>
 
   <div id="listaPagosPendientes" class="space-y-3">
     <p class="text-gray-500">Cargando pagos pendientes...</p>
   </div>
 </section>
+
+<!-- Modal para agregar nuevo pago pendiente -->
+<div id="modalAgregarPago" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold flex items-center">
+        <i class="fas fa-plus-circle mr-2 text-indigo-500"></i>Agregar Pago Pendiente
+      </h2>
+      <button onclick="cerrarModal('modalAgregarPago')" class="text-gray-500 hover:text-gray-700">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+        <input type="text" id="pagoDescripcion" placeholder="Ej: Servicio de energía" class="border p-2 rounded w-full">
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+          <input type="number" id="pagoValor" placeholder="0" class="pl-8 border p-2 rounded w-full">
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+        <select id="pagoCategoria" class="border p-2 rounded w-full">
+          <option value="">-- Selecciona una categoría --</option>
+          <option value="Servicios públicos">Servicios públicos</option>
+          <option value="Arriendo">Arriendo</option>
+          <option value="Préstamos">Préstamos</option>
+          <option value="Tarjetas de crédito">Tarjetas de crédito</option>
+          <option value="Impuestos">Impuestos</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
+        <select id="pagoBanco" class="border p-2 rounded w-full"></select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento</label>
+        <input type="date" id="pagoFechaVencimiento" class="border p-2 rounded w-full">
+      </div>
+      
+      <button onclick="agregarPagoPendiente()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center justify-center">
+        <i class="fas fa-save mr-2"></i>Guardar Pago Pendiente
+      </button>
+    </div>
+  </div>
+</div>
     
   <script>
         // Conectar a Supabase
@@ -1231,51 +1292,230 @@ function cerrarModal(id) {
   modal.classList.add("hidden");
 }
 
-// Función para cargar pagos pendientes
+  // Mostrar modal para agregar pago pendiente
+function mostrarModalAgregarPago() {
+  // Llenar select de bancos
+  const selectBanco = document.getElementById("pagoBanco");
+  selectBanco.innerHTML = '';
+  for (const banco in bancos) {
+    const opt = document.createElement("option");
+    opt.value = banco;
+    opt.textContent = banco;
+    selectBanco.appendChild(opt);
+  }  
+  // Establecer fecha mínima como hoy
+  document.getElementById("pagoFechaVencimiento").min = new Date().toISOString().split("T")[0];
+  
+  document.getElementById("modalAgregarPago").style.display = "flex";
+}
+
+// Agregar nuevo pago pendiente
+async function agregarPagoPendiente() {
+  const descripcion = document.getElementById("pagoDescripcion").value;
+  const valor = Number(document.getElementById("pagoValor").value);
+  const categoria = document.getElementById("pagoCategoria").value;
+  const banco = document.getElementById("pagoBanco").value;
+  const fechaVencimiento = document.getElementById("pagoFechaVencimiento").value;
+
+  if (!descripcion || !valor || !categoria || !banco) {
+    mostrarAlerta("Por favor completa todos los campos obligatorios", "error");
+    return;
+  }
+
+  const { error } = await supabase.from('pagos_pendientes').insert([
+    {
+      descripcion,
+      valor,
+      categoria,
+      banco_destino: banco,
+      fecha_vencimiento: fechaVencimiento || null,
+      completado: false
+    }
+  ]);
+
+  if (error) {
+    console.error("Error al guardar pago pendiente:", error);
+    mostrarAlerta("Error al guardar el pago pendiente", "error");
+    return;
+  }
+// Limpiar campos
+  document.getElementById("pagoDescripcion").value = "";
+  document.getElementById("pagoValor").value = "";
+  document.getElementById("pagoCategoria").value = "";
+  document.getElementById("pagoBanco").value = "";
+  document.getElementById("pagoFechaVencimiento").value = "";
+
+  cerrarModal("modalAgregarPago");
+  await cargarPagosPendientes();
+  mostrarAlerta("Pago pendiente agregado correctamente", "success");
+}
+    // Función mejorada para cargar pagos pendientes
 async function cargarPagosPendientes() {
   const contenedor = document.getElementById("listaPagosPendientes");
-  contenedor.innerHTML = "<p class='text-gray-500'>Cargando pagos pendientes...</p>";
+  contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-indigo-500'></i> Cargando pagos pendientes...</div>";
 
   const { data, error } = await supabase
     .from("pagos_pendientes")
     .select("*")
+    .eq("completado", false)
     .order("fecha_vencimiento", { ascending: true });
 
   if (error) {
-    contenedor.innerHTML = `<p class="text-red-500">❌ Error al cargar los pagos pendientes</p>`;
-    console.error("❌ Supabase error:", error);
+    contenedor.innerHTML = `<div class="text-red-500 text-center py-4"><i class="fas fa-exclamation-circle mr-2"></i>Error al cargar los pagos pendientes</div>`;
+    console.error("Error al cargar pagos pendientes:", error);
     return;
   }
 
   if (!data || data.length === 0) {
-    contenedor.innerHTML = `<p class="text-gray-600">No hay pagos pendientes registrados.</p>`;
+    contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">No hay pagos pendientes registrados.</div>`;
     return;
   }
 
   contenedor.innerHTML = "";
-  for (const mov of data) {
-    const fecha = mov.fecha_vencimiento
-      ? new Date(mov.fecha_vencimiento).toLocaleDateString("es-CO")
-      : "Sin fecha";
+  // Agrupar por categoría
+  const pagosPorCategoria = {};
+  data.forEach(pago => {
+    if (!pagosPorCategoria[pago.categoria || "Sin categoría"]) {
+      pagosPorCategoria[pago.categoria || "Sin categoría"] = [];
+    }
+    pagosPorCategoria[pago.categoria || "Sin categoría"].push(pago);
+  });
 
-    const div = document.createElement("div");
-    div.className = "border p-3 rounded shadow-sm bg-white";
-    div.innerHTML = `
-      <p class="font-medium">${mov.descripcion}</p>
-      <p class="text-sm text-gray-600">Valor: ${formatoMoneda(mov.valor)}</p>
-      <p class="text-xs text-gray-500">Categoría: ${mov.categoria || "Sin categoría"}</p>
-      <p class="text-xs text-gray-400">Vence: ${fecha}</p>
-    `;
-    contenedor.appendChild(div);
+  // Mostrar por categorías
+  for (const categoria in pagosPorCategoria) {
+    const categoriaDiv = document.createElement("div");
+    categoriaDiv.className = "mb-6";
+    
+    const categoriaTitle = document.createElement("h3");
+    categoriaTitle.className = "font-semibold text-lg mb-2 text-indigo-600 border-b pb-1";
+    categoriaTitle.textContent = categoria;
+    categoriaDiv.appendChild(categoriaTitle);
+    
+    const pagosContainer = document.createElement("div");
+    pagosContainer.className = "space-y-3";
+    
+    pagosPorCategoria[categoria].forEach(pago => {
+      const pagoDiv = document.createElement("div");
+      pagoDiv.className = "border p-3 rounded-lg shadow-sm bg-white flex justify-between items-start";
+      
+      const fechaVencimiento = pago.fecha_vencimiento 
+        ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
+        : "Sin fecha";
+      
+      const hoy = new Date();
+      const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
+      const estaVencido = fechaVenc && fechaVenc < hoy;
+      
+      pagoDiv.innerHTML = `
+        <div class="flex-1">
+          <div class="flex items-start justify-between">
+            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">${pago.descripcion}</p>
+            <span class="ml-2 font-bold">${formatoMoneda(pago.valor)}</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-500 mt-1">
+            <i class="fas fa-university mr-1 text-xs"></i>
+            <span class="mr-3">${pago.banco_destino || 'Sin banco'}</span>
+            <i class="fas fa-calendar-day mr-1 text-xs"></i>
+            <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
+          </div>
+        </div>
+        <div class="flex space-x-2 ml-4">
+          <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.banco_destino}')" 
+            class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
+            <i class="fas fa-check-circle"></i>
+          </button>
+          <button onclick="eliminarPagoPendiente(${pago.id})" 
+            class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      `;
+      
+      pagosContainer.appendChild(pagoDiv);
+    });
+    
+    categoriaDiv.appendChild(pagosContainer);
+    contenedor.appendChild(categoriaDiv);
+  }
+}
+   // Marcar pago como completado y convertirlo en gasto
+async function marcarPagoComoCompletado(idPago, valor, banco) {
+  if (!banco) {
+    mostrarAlerta("Este pago no tiene banco destino asignado", "error");
+    return;
+  }
+  if (confirm(`¿Marcar este pago como completado y registrar como gasto en ${banco} por ${formatoMoneda(valor)}?`)) {
+    // 1. Registrar como gasto
+    const fecha = new Date().toISOString();
+    const descripcion = `Pago completado: ${document.querySelector(`[onclick="marcarPagoComoCompletado(${idPago}, ${valor}, '${banco}')"]`).closest('div').querySelector('p').textContent.trim();
+const { error: gastoError } = await supabase.from('movimientos').insert([
+      {
+        tipo: "gasto",
+        valor: valor,
+        descripcion: descripcion,
+        categoria: "Pago pendiente completado",
+        banco_destino: banco,
+        fecha: fecha
+      }
+    ]);                                          
+  if (gastoError) {
+      console.error("Error al registrar gasto:", gastoError);
+      mostrarAlerta("Error al registrar el gasto", "error");
+      return;
+    }                                          
+    // 2. Actualizar pago como completado
+    const { error } = await supabase
+      .from('pagos_pendientes')
+      .update({ 
+        completado: true,
+        fecha_completado: fecha
+      })
+      .eq('id', idPago);
+
+    if (error) {
+      console.error("Error al actualizar pago:", error);
+      mostrarAlerta("Error al marcar el pago como completado", "error");
+      return;
+    }
+
+    // Actualizar la vista
+    await cargarPagosPendientes();
+    await cargarMovimientosDesdeSupabase();
+    mostrarAlerta("Pago marcado como completado y registrado como gasto", "success");
   }
 }
 
+// Eliminar pago pendiente
+async function eliminarPagoPendiente(idPago) {
+  if (confirm("¿Estás seguro de eliminar este pago pendiente?")) {
+    const { error } = await supabase
+      .from('pagos_pendientes')
+      .delete()
+      .eq('id', idPago);
+
+    if (error) {
+      console.error("Error al eliminar pago:", error);
+      mostrarAlerta("Error al eliminar el pago pendiente", "error");
+      return;
+    }
+
+    await cargarPagosPendientes();
+    mostrarAlerta("Pago pendiente eliminado correctamente", "success");
+  }
+}                                        
+                            
 // Inicializar aplicación
 (async () => {
   await cargarMovimientosDesdeSupabase();
   actualizarFiltroBanco();
-  await cargarPagosPendientes(); // 👈 AÑADIR esta línea
+  await cargarPagosPendientes(); // Cargar pagos pendientes al inicio
+  
+  // Actualizar cada 5 minutos por si hay cambios
+  setInterval(async () => {
+    await cargarPagosPendientes();
+  }, 300000); // 5 minutos
 })();
+                                            
 </script>   
 </body>
 </html>
