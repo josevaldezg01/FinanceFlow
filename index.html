@@ -1460,18 +1460,20 @@ pagoDiv.innerHTML = `
     <div class="flex items-center text-sm text-gray-500 mt-1">
       <i class="fas fa-university mr-1 text-xs"></i>
       <span class="mr-3">${pago.banco_destino || 'Sin banco asignado'}</span>
-      <i class="fas fa-calendar-day mr-1 text-xs"></i>
-      <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
+      ${fechaVencimiento ? `
+        <i class="fas fa-calendar-day mr-1 text-xs"></i>
+        <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
+      ` : ''}
     </div>
   </div>
   <div class="flex space-x-2 ml-4">
-    <!-- Botón de editar (lapicito) -->
+    <!-- Botón de editar -->
     <button onclick="editarPagoPendiente(${pago.id})" 
       class="text-blue-500 hover:text-blue-700 p-1" title="Editar">
       <i class="fas fa-edit"></i>
     </button>
     <!-- Botón de marcar como pagado -->
-    <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
+    <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, \`${pago.descripcion.replace(/'/g, "\\'")}\`, '${pago.categoria || 'Sin categoría'}', '${pago.banco_destino || ''}')" 
       class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
       <i class="fas fa-check-circle"></i>
     </button>
@@ -1482,14 +1484,6 @@ pagoDiv.innerHTML = `
     </button>
   </div>
 `;
-      
-      pagosContainer.appendChild(pagoDiv);
-    });
-    
-    categoriaDiv.appendChild(pagosContainer);
-    contenedor.appendChild(categoriaDiv);
-  }
-}
 
     async function editarPagoPendiente(idPago) {
   // Obtener datos actuales del pago
