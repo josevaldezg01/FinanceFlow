@@ -1411,30 +1411,38 @@ async function cargarPagosPendientes() {
       const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
       const estaVencido = fechaVenc && fechaVenc < hoy;
       
-      pagoDiv.innerHTML = `
-        <div class="flex-1">
-          <div class="flex items-start justify-between">
-            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">${pago.descripcion}</p>
-            <span class="ml-2 font-bold">${formatoMoneda(pago.valor)}</span>
-          </div>
-          <div class="flex items-center text-sm text-gray-500 mt-1">
-            <i class="fas fa-university mr-1 text-xs"></i>
-            <span class="mr-3">${pago.banco_destino || 'Sin banco'}</span>
-            <i class="fas fa-calendar-day mr-1 text-xs"></i>
-            <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
-          </div>
-        </div>
-        <div class="flex space-x-2 ml-4">
-          <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.banco_destino}')" 
-            class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
-            <i class="fas fa-check-circle"></i>
-          </button>
-          <button onclick="eliminarPagoPendiente(${pago.id})" 
-            class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
-      `;
+      // En la función cargarPagosPendientes(), actualiza el HTML de cada pago:
+pagoDiv.innerHTML = `
+  <div class="flex-1">
+    <div class="flex items-start justify-between">
+      <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">${pago.descripcion}</p>
+      <span class="ml-2 font-bold">${formatoMoneda(pago.valor)}</span>
+    </div>
+    <div class="flex items-center text-sm text-gray-500 mt-1">
+      <i class="fas fa-university mr-1 text-xs"></i>
+      <span class="mr-3">${pago.banco_destino || 'Sin banco asignado'}</span>
+      <i class="fas fa-calendar-day mr-1 text-xs"></i>
+      <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
+    </div>
+  </div>
+  <div class="flex space-x-2 ml-4">
+    <!-- Botón de editar (lapicito) -->
+    <button onclick="editarPagoPendiente(${pago.id})" 
+      class="text-blue-500 hover:text-blue-700 p-1" title="Editar">
+      <i class="fas fa-edit"></i>
+    </button>
+    <!-- Botón de marcar como pagado -->
+    <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
+      class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
+      <i class="fas fa-check-circle"></i>
+    </button>
+    <!-- Botón de eliminar -->
+    <button onclick="eliminarPagoPendiente(${pago.id})" 
+      class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+`;
       
       pagosContainer.appendChild(pagoDiv);
     });
@@ -1443,60 +1451,118 @@ async function cargarPagosPendientes() {
     contenedor.appendChild(categoriaDiv);
   }
 }
- // Marcar pago como completado y convertirlo en gasto
-async function marcarPagoComoCompletado(idPago, valor, banco) {
-  if (!banco) {
-    mostrarAlerta("Este pago no tiene banco destino asignado", "error");
+
+    async function editarPagoPendiente(idPago) {
+  // Obtener datos actuales del pago
+  const { data: pago, error } = await supabase
+    .from('pagos_pendientes')
+    .select('*')
+    .eq('id', idPago)
+    .single();
+
+  if (error) {
+    mostrarAlerta("Error al cargar el pago", "error");
     return;
   }
 
-  if (confirm(`¿Marcar este pago como completado y registrar como gasto en ${banco} por ${formatoMoneda(valor)}?`)) {
-    // 1. Registrar como gasto
-    const fecha = new Date().toISOString();
-    
-    // Primero obtenemos el elemento del DOM
-    const pagoElement = document.querySelector(`[onclick*="marcarPagoComoCompletado(${idPago}"]`);
-    const descripcionElement = pagoElement ? pagoElement.closest('div').querySelector('p') : null;
-    const descripcion = descripcionElement 
-      ? `Pago completado: ${descripcionElement.textContent.trim()}`
-      : `Pago completado (ID: ${idPago})`;
-    
-    const { error: gastoError } = await supabase.from('movimientos').insert([
-      {
-        tipo: "gasto",
-        valor: valor,
-        descripcion: descripcion,
-        categoria: "Pago pendiente completado",
-        banco_destino: banco,
-        fecha: fecha
-      }
-    ]);
-
-    if (gastoError) {
-      console.error("Error al registrar gasto:", gastoError);
-      mostrarAlerta("Error al registrar el gasto", "error");
-      return;
+  // Crear modal de edición con SweetAlert2
+  const { value: formValues } = await Swal.fire({
+    title: 'Editar pago pendiente',
+    html: `
+      <div class="text-left">
+        <label class="block text-sm font-medium mb-1">Descripción</label>
+        <input id="swal-descripcion" value="${pago.descripcion}" class="swal2-input">
+        
+        <label class="block text-sm font-medium mb-1 mt-3">Valor</label>
+        <input type="number" id="swal-valor" value="${pago.valor}" class="swal2-input">
+        
+        <label class="block text-sm font-medium mb-1 mt-3">Banco Destino</label>
+        <select id="swal-banco" class="swal2-input">
+          <option value="">-- Sin asignar --</option>
+          ${Object.keys(bancos).map(banco => 
+            `<option value="${banco}" ${banco === pago.banco_destino ? 'selected' : ''}>${banco}</option>`
+          ).join('')}
+        </select>
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    preConfirm: () => {
+      return {
+        descripcion: document.getElementById('swal-descripcion').value,
+        valor: parseFloat(document.getElementById('swal-valor').value),
+        banco: document.getElementById('swal-banco').value
+      };
     }
+  });
 
-    // 2. Actualizar pago como completado
+  if (formValues) {
+    // Actualizar en Supabase
     const { error } = await supabase
       .from('pagos_pendientes')
-      .update({ 
-        completado: true,
-        fecha_completado: fecha
+      .update({
+        descripcion: formValues.descripcion,
+        valor: formValues.valor,
+        banco_destino: formValues.banco || null
       })
       .eq('id', idPago);
 
-    if (error) {
-      console.error("Error al actualizar pago:", error);
-      mostrarAlerta("Error al marcar el pago como completado", "error");
-      return;
+    if (!error) {
+      await cargarPagosPendientes();
+      mostrarAlerta("Pago actualizado correctamente", "success");
     }
+  }
+}
+    
+ // Marcar pago como completado y convertirlo en gasto
+async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, bancoActual = "") {
+  // Si no hay banco definido, pedirlo al usuario
+  if (!bancoActual) {
+    const { value: bancoSeleccionado } = await Swal.fire({
+      title: 'Selecciona el banco de pago',
+      text: `Para completar el pago de ${descripcion}`,
+      input: 'select',
+      inputOptions: Object.fromEntries(Object.keys(bancos).map(b => [b, b])),
+      inputPlaceholder: 'Selecciona un banco',
+      showCancelButton: true,
+      inputValidator: (value) => !value && 'Debes seleccionar un banco'
+    });
 
-    // Actualizar la vista
+    if (!bancoSeleccionado) return; // Usuario canceló
+    bancoActual = bancoSeleccionado;
+  }
+
+  // Verificar saldo si el banco existe
+  if (bancoActual && bancos[bancoActual] < valor) {
+    mostrarAlerta(`Saldo insuficiente en ${bancoActual}. Disponible: ${formatoMoneda(bancos[bancoActual])}`, "error");
+    return;
+  }
+
+  // Registrar el gasto
+  const fecha = new Date().toISOString();
+  const { error: gastoError } = await supabase.from('movimientos').insert([{
+    tipo: "gasto",
+    valor: valor,
+    descripcion: `Pago completado: ${descripcion}`,
+    categoria: categoria || "Pago pendiente",
+    banco_destino: bancoActual,
+    fecha: fecha
+  }]);
+
+  if (!gastoError) {
+    // Actualizar el pago como completado
+    await supabase.from('pagos_pendientes')
+      .update({ 
+        completado: true,
+        fecha_completado: fecha,
+        banco_destino: bancoActual // Actualiza el banco si se seleccionó ahora
+      })
+      .eq('id', idPago);
+
+    // Refrescar datos
     await cargarPagosPendientes();
     await cargarMovimientosDesdeSupabase();
-    mostrarAlerta("Pago marcado como completado y registrado como gasto", "success");
+    mostrarAlerta("✅ Pago registrado correctamente", "success");
   }
 }
 
