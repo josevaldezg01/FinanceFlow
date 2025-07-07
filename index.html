@@ -37,6 +37,14 @@
       position: relative;
       height: 300px;
     }
+    #seccionPagosPendientes {
+  scroll-margin-top: 20px; /* Para que el scroll al hacer clic en el botón se alinee bien */
+}
+/* Estilo para pagos vencidos */
+.pago-vencido {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
     @media (max-width: 640px) {
       .chart-container {
         height: 200px;
@@ -86,7 +94,7 @@
 
     <!-- Botón para abrir la sección de Pagos Pendientes -->
 <section class="mb-6 text-right">
-  <button onclick="document.getElementById('seccionPagosPendientes').scrollIntoView({ behavior: 'smooth' })" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
+  <button onclick="document.getElementById('seccionPagosPendientes').scrollIntoView({ behavior: 'smooth' });" ...>
   <i class="fas fa-clock mr-2"></i>Pagos Pendientes
 </button>
 </section>
@@ -489,8 +497,8 @@
     </div>
   </div>
 
-<!-- Sección de Pagos Pendientes - Modificada -->
-<section id="seccionPagosPendientes" class="mt-10 bg-white border border-gray-200 p-6 rounded-lg shadow-md">
+<!-- Sección de Pagos Pendientes - Versión mejorada -->
+<section id="seccionPagosPendientes" class="mt-8 bg-white p-4 rounded-lg shadow-md">
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-xl font-semibold flex items-center text-indigo-700">
       <i class="fas fa-clock mr-2"></i>Pagos Pendientes
@@ -499,7 +507,6 @@
       <i class="fas fa-plus mr-1"></i>Agregar Pago
     </button>
   </div>
-
   <div id="listaPagosPendientes" class="space-y-3">
     <p class="text-gray-500">Cargando pagos pendientes...</p>
   </div>
@@ -1358,52 +1365,48 @@ async function agregarPagoPendiente() {
     // Función mejorada para cargar pagos pendientes
 async function cargarPagosPendientes() {
   const contenedor = document.getElementById("listaPagosPendientes");
-  contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-indigo-500'></i> Cargando pagos pendientes...</div>";
+  contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-indigo-500'></i> Cargando...</div>";
 
-  const { data, error } = await supabase
+  const { data: pagos, error } = await supabase
     .from("pagos_pendientes")
     .select("*")
     .eq("completado", false)
     .order("fecha_vencimiento", { ascending: true });
 
   if (error) {
-    contenedor.innerHTML = `<div class="text-red-500 text-center py-4"><i class="fas fa-exclamation-circle mr-2"></i>Error al cargar los pagos pendientes</div>`;
-    console.error("Error al cargar pagos pendientes:", error);
+    contenedor.innerHTML = '<div class="text-red-500 text-center py-4"><i class="fas fa-exclamation-circle mr-2"></i>Error al cargar</div>';
     return;
   }
 
-  if (!data || data.length === 0) {
-    contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">No hay pagos pendientes registrados.</div>`;
+  if (!pagos || pagos.length === 0) {
+    contenedor.innerHTML = '<div class="text-gray-500 text-center py-4">No hay pagos pendientes</div>';
     return;
   }
 
-  contenedor.innerHTML = "";
   // Agrupar por categoría
   const pagosPorCategoria = {};
-  data.forEach(pago => {
-    if (!pagosPorCategoria[pago.categoria || "Sin categoría"]) {
-      pagosPorCategoria[pago.categoria || "Sin categoría"] = [];
+  pagos.forEach(pago => {
+    const categoria = pago.categoria || "Otros";
+    if (!pagosPorCategoria[categoria]) {
+      pagosPorCategoria[categoria] = [];
     }
-    pagosPorCategoria[pago.categoria || "Sin categoría"].push(pago);
+    pagosPorCategoria[categoria].push(pago);
   });
 
   // Mostrar por categorías
+  contenedor.innerHTML = "";
   for (const categoria in pagosPorCategoria) {
     const categoriaDiv = document.createElement("div");
     categoriaDiv.className = "mb-6";
     
-    const categoriaTitle = document.createElement("h3");
-    categoriaTitle.className = "font-semibold text-lg mb-2 text-indigo-600 border-b pb-1";
-    categoriaTitle.textContent = categoria;
-    categoriaDiv.appendChild(categoriaTitle);
+    categoriaDiv.innerHTML = `
+      <h3 class="font-semibold text-lg mb-2 text-indigo-600 border-b pb-1">${categoria}</h3>
+      <div class="space-y-3" id="pagos-${categoria.replace(/\s+/g, '-')}"></div>
+    `;
     
-    const pagosContainer = document.createElement("div");
-    pagosContainer.className = "space-y-3";
+    const pagosContainer = categoriaDiv.querySelector(`#pagos-${categoria.replace(/\s+/g, '-')}`);
     
     pagosPorCategoria[categoria].forEach(pago => {
-      const pagoDiv = document.createElement("div");
-      pagoDiv.className = "border p-3 rounded-lg shadow-sm bg-white flex justify-between items-start";
-      
       const fechaVencimiento = pago.fecha_vencimiento 
         ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
         : "Sin fecha";
@@ -1411,6 +1414,38 @@ async function cargarPagosPendientes() {
       const hoy = new Date();
       const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
       const estaVencido = fechaVenc && fechaVenc < hoy;
+      
+      const pagoDiv = document.createElement("div");
+      pagoDiv.className = `border p-3 rounded-lg shadow-sm bg-white ${estaVencido ? 'border-red-200' : ''}`;
+      pagoDiv.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">${pago.descripcion}</p>
+            <div class="flex items-center text-sm text-gray-500 mt-1">
+              <span class="mr-3">${formatoMoneda(pago.valor)}</span>
+              <i class="fas fa-university mr-1 text-xs"></i>
+              <span class="mr-3">${pago.banco_destino || 'Sin banco'}</span>
+              ${fechaVencimiento && `<i class="fas fa-calendar-day mr-1 text-xs"></i>
+              <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>`}
+            </div>
+          </div>
+          <div class="flex space-x-2 ml-4">
+            <button onclick="editarPagoPendiente(${pago.id})" class="text-blue-500 hover:text-blue-700 p-1">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
+              class="text-green-500 hover:text-green-700 p-1">
+              <i class="fas fa-check-circle"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      pagosContainer.appendChild(pagoDiv);
+    });
+    
+    contenedor.appendChild(categoriaDiv);
+  }
+}
       
       // En la función cargarPagosPendientes(), actualiza el HTML de cada pago:
 pagoDiv.innerHTML = `
