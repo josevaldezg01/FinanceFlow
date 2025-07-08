@@ -1516,6 +1516,7 @@ pagoDiv.innerHTML = `
 }
     
  // Marcar pago como completado y convertirlo en gasto
+// Modificar la función marcarPagoComoCompletado
 async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, bancoActual = "") {
   // Si no hay banco definido, pedirlo al usuario
   if (!bancoActual) {
@@ -1551,12 +1552,13 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
   }]);
 
   if (!gastoError) {
-    // Actualizar el pago como completado
+    // Actualizar el pago como completado (pero no eliminarlo)
     await supabase.from('pagos_pendientes')
       .update({ 
         completado: true,
         fecha_completado: fecha,
-        banco_destino: bancoActual // Actualiza el banco si se seleccionó ahora
+        banco_destino: bancoActual,
+        valor_pagado: valor // Nuevo campo para guardar el valor pagado
       })
       .eq('id', idPago);
 
@@ -1564,6 +1566,226 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
     await cargarPagosPendientes();
     await cargarMovimientosDesdeSupabase();
     mostrarAlerta("✅ Pago registrado correctamente", "success");
+  }
+}
+
+// Modificar la función cargarPagosPendientes para mostrar pagos completados de este mes
+async function cargarPagosPendientes() {
+  const contenedor = document.getElementById("listaPagosPendientes");
+  contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-indigo-500'></i> Cargando pagos pendientes...</div>";
+
+  // Obtener el primer y último día del mes actual
+  const hoy = new Date();
+  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+  // Cargar todos los pagos (pendientes y completados este mes)
+  const { data, error } = await supabase
+    .from("pagos_pendientes")
+    .select("*")
+    .or(`completado.eq.false,fecha_completado.gte.${primerDiaMes.toISOString()},fecha_completado.is.null`)
+    .order("fecha_vencimiento", { ascending: true });
+
+  if (error) {
+    contenedor.innerHTML = `<div class="text-red-500 text-center py-4"><i class="fas fa-exclamation-circle mr-2"></i>Error al cargar los pagos pendientes</div>`;
+    console.error("Error al cargar pagos pendientes:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">No hay pagos pendientes registrados.</div>`;
+    return;
+  }
+
+  contenedor.innerHTML = "";
+  
+  // Agrupar por categoría
+  const pagosPorCategoria = {};
+  data.forEach(pago => {
+    if (!pagosPorCategoria[pago.categoria || "Sin categoría"]) {
+      pagosPorCategoria[pago.categoria || "Sin categoría"] = [];
+    }
+    pagosPorCategoria[pago.categoria || "Sin categoría"].push(pago);
+  });
+
+  // Mostrar por categorías
+  for (const categoria in pagosPorCategoria) {
+    const categoriaDiv = document.createElement("div");
+    categoriaDiv.className = "mb-6";
+    
+    const categoriaTitle = document.createElement("h3");
+    categoriaTitle.className = "font-semibold text-lg mb-2 text-indigo-600 border-b pb-1";
+    categoriaTitle.textContent = categoria;
+    categoriaDiv.appendChild(categoriaTitle);
+    
+    const pagosContainer = document.createElement("div");
+    pagosContainer.className = "space-y-3";
+    
+    pagosPorCategoria[categoria].forEach(pago => {
+      const pagoDiv = document.createElement("div");
+      pagoDiv.className = `border p-3 rounded-lg shadow-sm ${pago.completado ? 'bg-green-50' : 'bg-white'}`;
+      
+      const fechaVencimiento = pago.fecha_vencimiento 
+        ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
+        : "Sin fecha";
+      
+      const hoy = new Date();
+      const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
+      const estaVencido = fechaVenc && fechaVenc < hoy;
+      
+      pagoDiv.innerHTML = `
+        <div class="flex-1">
+          <div class="flex items-start justify-between">
+            <p class="font-medium ${estaVencido && !pago.completado ? 'text-red-600' : ''}">
+              ${pago.descripcion}
+              ${pago.completado ? '<span class="ml-2 text-green-600 text-sm">(Pagado)</span>' : ''}
+            </p>
+            <span class="ml-2 font-bold">${formatoMoneda(pago.completado ? pago.valor_pagado || pago.valor : pago.valor)}</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-500 mt-1">
+            <i class="fas fa-university mr-1 text-xs"></i>
+            <span class="mr-3">${pago.banco_destino || 'Sin banco asignado'}</span>
+            <i class="fas fa-calendar-day mr-1 text-xs"></i>
+            <span class="${estaVencido && !pago.completado ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
+            ${pago.completado ? `<i class="fas fa-check-circle ml-2 text-green-500"></i>` : ''}
+          </div>
+        </div>
+        <div class="flex space-x-2 ml-4">
+          <!-- Botón de editar -->
+          <button onclick="editarPagoPendiente(${pago.id})" 
+            class="text-blue-500 hover:text-blue-700 p-1" title="Editar">
+            <i class="fas fa-edit"></i>
+          </button>
+          <!-- Botón de marcar como pagado (solo si no está completado) -->
+          ${!pago.completado ? `
+            <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
+              class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
+              <i class="fas fa-check-circle"></i>
+            </button>
+          ` : ''}
+          <!-- Botón de eliminar -->
+          <button onclick="eliminarPagoPendiente(${pago.id})" 
+            class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      `;
+      
+      pagosContainer.appendChild(pagoDiv);
+    });
+    
+    categoriaDiv.appendChild(pagosContainer);
+    contenedor.appendChild(categoriaDiv);
+  }
+}
+
+// Función para reiniciar pagos al cambiar de mes (llamar al cerrar mes)
+async function reiniciarPagosPendientes() {
+  // Obtener el primer día del mes actual
+  const hoy = new Date();
+  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  
+  // Buscar pagos completados en meses anteriores
+  const { data: pagosAntiguos, error } = await supabase
+    .from('pagos_pendientes')
+    .select('*')
+    .lt('fecha_completado', primerDiaMes.toISOString())
+    .eq('completado', true);
+
+  if (error) {
+    console.error("Error al buscar pagos antiguos:", error);
+    return;
+  }
+
+  // Para cada pago antiguo, crear una nueva versión con valor 0
+  for (const pago of pagosAntiguos) {
+    const { error: insertError } = await supabase.from('pagos_pendientes').insert([{
+      descripcion: pago.descripcion,
+      valor: 0, // Nuevo valor en 0
+      categoria: pago.categoria,
+      banco_destino: null, // Sin banco asignado
+      fecha_vencimiento: null, // Sin fecha de vencimiento
+      completado: false
+    }]);
+
+    if (!insertError) {
+      // Eliminar el pago antiguo
+      await supabase.from('pagos_pendientes')
+        .delete()
+        .eq('id', pago.id);
+    }
+  }
+}
+
+// Modificar la función cerrarMes para incluir el reinicio de pagos
+async function cerrarMes() {
+  if (confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) {
+    const fechaActual = new Date();
+    const mes = fechaActual.getMonth() + 1;
+    const año = fechaActual.getFullYear();
+    const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+
+    // Calcular ingresos y gastos totales
+    let ingresos = 0, gastos = 0;
+    for (const banco in movimientos) {
+      for (const mov of movimientos[banco]) {
+        if (mov.tipo === "ingreso") ingresos += mov.valor;
+        else if (mov.tipo === "gasto") gastos += mov.valor;
+      }
+    }
+
+    // Convertir movimientos por banco a una lista plana
+    const movimientosPlanos = [];
+    for (const banco in movimientos) {
+      for (const mov of movimientos[banco]) {
+        movimientosPlanos.push({
+          ...mov,
+          banco_destino: mov.banco || banco
+        });
+      }
+    }
+
+    // Guardar en Supabase
+    const { error } = await supabase.from("historial_mensual").insert([
+      {
+        mes: mes,
+        año: año,
+        nombre_mes: nombreMes,
+        fecha_cierre: fechaActual.toISOString(),
+        ingresos: ingresos,
+        gastos: gastos,
+        balance: ingresos - gastos,
+        saldos: bancos,
+        movimientos: movimientosPlanos
+      }
+    ]);
+
+    if (error) {
+      console.error("❌ Error al guardar en historial_mensual:", error);
+      mostrarAlerta("❌ No se pudo guardar el mes cerrado", "error");
+      return;
+    }
+
+    // Limpiar tabla movimientos
+    const { error: deleteError } = await supabase.from("movimientos").delete().neq("id", 0);
+
+    if (deleteError) {
+      console.error("❌ Error al limpiar tabla movimientos:", deleteError);
+    }
+
+    // Reiniciar pagos pendientes
+    await reiniciarPagosPendientes();
+
+    // Reiniciar estado
+    for (const banco in bancos) {
+      bancos[banco] = 0;
+      movimientos[banco] = [];
+    }
+
+    document.getElementById("historial").innerHTML = "";
+    actualizarTotales();
+    await cargarPagosPendientes(); // Recargar la lista de pagos
+    mostrarAlerta(`Mes ${nombreMes} cerrado correctamente.`, "success");
   }
 }
 
