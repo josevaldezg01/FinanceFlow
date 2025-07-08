@@ -1699,11 +1699,10 @@ async function cargarPagosPendientes() {
 
 // Función para reiniciar pagos al cambiar de mes (llamar al cerrar mes)
 async function reiniciarPagosPendientes() {
-  // Obtener el primer día del mes actual
   const hoy = new Date();
   const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
   
-  // Buscar pagos completados en meses anteriores
+  // 1. Buscar pagos completados en meses anteriores
   const { data: pagosAntiguos, error } = await supabase
     .from('pagos_pendientes')
     .select('*')
@@ -1715,16 +1714,29 @@ async function reiniciarPagosPendientes() {
     return;
   }
 
-  // Para cada pago antiguo, crear una nueva versión con valor 0
+  // 2. Para cada pago antiguo, crear uno nuevo con la fecha ajustada
   for (const pago of pagosAntiguos) {
-    const { error: insertError } = await supabase.from('pagos_pendientes').insert([{
-      descripcion: pago.descripcion,
-      valor: 0, // Nuevo valor en 0
-      categoria: pago.categoria,
-      banco_destino: null, // Sin banco asignado
-      fecha_vencimiento: null, // Sin fecha de vencimiento
-      completado: false
-    }]);
+    if (pago.fecha_vencimiento) {
+      const fechaVencimiento = new Date(pago.fecha_vencimiento);
+      const nuevoMes = hoy.getMonth() + 1; // Mes actual + 1 (ej: julio -> agosto)
+      const nuevoAnio = hoy.getFullYear();
+
+      // Conservar el mismo día, pero actualizar mes/año
+      const nuevaFechaVencimiento = new Date(
+        nuevoAnio,
+        nuevoMes,
+        fechaVencimiento.getDate() // Mismo día del mes
+      );
+
+      // 3. Insertar el nuevo pago con la fecha actualizada
+      await supabase.from('pagos_pendientes').insert([{
+        descripcion: pago.descripcion,
+        valor: 0, // Valor reiniciado
+        categoria: pago.categoria,
+        banco_destino: null,
+        fecha_vencimiento: nuevaFechaVencimiento.toISOString(), // Nueva fecha
+        completado: false
+      }]);
 
     if (!insertError) {
       // Eliminar el pago antiguo
