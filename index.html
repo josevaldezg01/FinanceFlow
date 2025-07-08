@@ -412,82 +412,6 @@
   </div>
  </section>
 </div>
-  
-  <!-- Modal para ver meses anteriores -->
-  <div id="modalMesesAnteriores" class="modal">
-    <div class="modal-content">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold flex items-center">
-          <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i>Meses Anteriores
-        </h2>
-        <button onclick="cerrarModal('modalMesesAnteriores')" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div id="listaMeses" class="space-y-2">
-        <!-- Lista de meses se agregará aquí -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal para ver detalles de un mes -->
-  <div id="modalDetalleMes" class="modal">
-    <div class="modal-content">
-      <div class="flex justify-between items-center mb-4">
-        <h2 id="tituloDetalleMes" class="text-xl font-semibold flex items-center">
-          <i class="fas fa-file-invoice-dollar mr-2 text-indigo-500"></i>Detalle del Mes
-        </h2>
-        <button onclick="cerrarModal('modalDetalleMes')" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div class="bg-white p-4 rounded-lg shadow-md text-center">
-          <div class="flex items-center justify-center mb-2">
-            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
-              <i class="fas fa-arrow-up text-green-500"></i>
-            </div>
-            <h3 class="font-semibold">Ingresos Totales</h3>
-          </div>
-          <p id="detalleIngresos" class="text-green-600 font-bold text-xl">$0</p>
-        </div>
-                
-        <div class="bg-white p-4 rounded-lg shadow-md text-center">
-          <div class="flex items-center justify-center mb-2">
-            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
-              <i class="fas fa-arrow-down text-red-500"></i>
-            </div>
-            <h3 class="font-semibold">Gastos Totales</h3>
-          </div>
-          <p id="detalleGastos" class="text-red-600 font-bold text-xl">$0</p>
-        </div>
-                
-        <div class="bg-white p-4 rounded-lg shadow-md text-center">
-          <div class="flex items-center justify-center mb-2">
-            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-              <i class="fas fa-balance-scale text-blue-500"></i
-            </div>
-            <h3 class="font-semibold">Balance Total</h3>
-          </div>
-          <p id="detalleBalance" class="text-blue-600 font-bold text-xl">$0</p>
-        </div>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow-md mb-4">
-        <h3 class="font-semibold mb-2">Saldos Finales</h3>
-        <div id="detalleSaldos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          
-          <!-- Saldos por banco se agregarán aquí -->
-        </div>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow-md">
-        <h3 class="font-semibold mb-2">Movimientos</h3>
-        <div id="detalleMovimientos" class="space-y-2 max-h-96 overflow-y-auto pr-2">
-          
-          <!-- Movimientos se agregarán aquí -->
-        </div>
-      </div>
-    </div>
-  </div>
 
 <!-- Sección de Pagos Pendientes - Modificada -->
 <section id="seccionPagosPendientes" class="mt-10 bg-white border border-gray-200 p-6 rounded-lg shadow-md">
@@ -563,6 +487,82 @@
     </div>
   </div>
 </div>
+    
+  <!-- Modal para ver meses anteriores -->
+  <div id="modalMesesAnteriores" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold flex items-center">
+          <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i>Meses Anteriores
+        </h2>
+        <button onclick="cerrarModal('modalMesesAnteriores')" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="listaMeses" class="space-y-2">
+        <!-- Lista de meses se agregará aquí -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver detalles de un mes -->
+  <div id="modalDetalleMes" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="tituloDetalleMes" class="text-xl font-semibold flex items-center">
+          <i class="fas fa-file-invoice-dollar mr-2 text-indigo-500"></i>Detalle del Mes
+        </h2>
+        <button onclick="cerrarModal('modalDetalleMes')" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
+              <i class="fas fa-arrow-up text-green-500"></i>
+            </div>
+            <h3 class="font-semibold">Ingresos Totales</h3>
+          </div>
+          <p id="detalleIngresos" class="text-green-600 font-bold text-xl">$0</p>
+        </div>
+                
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
+              <i class="fas fa-arrow-down text-red-500"></i>
+            </div>
+            <h3 class="font-semibold">Gastos Totales</h3>
+          </div>
+          <p id="detalleGastos" class="text-red-600 font-bold text-xl">$0</p>
+        </div>
+                
+        <div class="bg-white p-4 rounded-lg shadow-md text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+              <i class="fas fa-balance-scale text-blue-500"></i
+            </div>
+            <h3 class="font-semibold">Balance Total</h3>
+          </div>
+          <p id="detalleBalance" class="text-blue-600 font-bold text-xl">$0</p>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+        <h3 class="font-semibold mb-2">Saldos Finales</h3>
+        <div id="detalleSaldos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          
+          <!-- Saldos por banco se agregarán aquí -->
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h3 class="font-semibold mb-2">Movimientos</h3>
+        <div id="detalleMovimientos" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+          
+          <!-- Movimientos se agregarán aquí -->
+        </div>
+      </div>
+    </div>
+  </div>
     
   <script>
         // Conectar a Supabase
