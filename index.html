@@ -1729,7 +1729,7 @@ async function reiniciarPagosPendientes() {
       );
 
       // 3. Insertar el nuevo pago con la fecha actualizada
-      await supabase.from('pagos_pendientes').insert([{
+      const { error: insertError } = await supabase.from('pagos_pendientes').insert([{
         descripcion: pago.descripcion,
         valor: 0, // Valor reiniciado
         categoria: pago.categoria,
@@ -1738,14 +1738,15 @@ async function reiniciarPagosPendientes() {
         completado: false
       }]);
 
-    if (!insertError) {
-      // Eliminar el pago antiguo
-      await supabase.from('pagos_pendientes')
-        .delete()
-        .eq('id', pago.id);
-    }
-  }
-}
+      if (!insertError) {
+        // Eliminar el pago antiguo
+        await supabase.from('pagos_pendientes')
+          .delete()
+          .eq('id', pago.id);
+      }
+    } // Cierre del if (fecha_vencimiento)
+  } // Cierre del for
+} // Cierre de la función
 
 // Modificar la función cerrarMes para incluir el reinicio de pagos
 async function cerrarMes() {
