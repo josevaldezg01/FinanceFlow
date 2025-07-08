@@ -1541,31 +1541,38 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
   }
 
   // Registrar el gasto
-  const fecha = new Date().toISOString();
+  const fechaPago = new Date().toISOString();
   const { error: gastoError } = await supabase.from('movimientos').insert([{
     tipo: "gasto",
     valor: valor,
     descripcion: `Pago completado: ${descripcion}`,
     categoria: categoria || "Pago pendiente",
     banco_destino: bancoActual,
-    fecha: fecha
+    fecha: fechaPago
   }]);
 
   if (!gastoError) {
-    // Actualizar el pago como completado (pero no eliminarlo)
-    await supabase.from('pagos_pendientes')
+    // Actualizar el pago como completado (con fecha exacta)
+    const { error: updateError } = await supabase.from('pagos_pendientes')
       .update({ 
         completado: true,
-        fecha_completado: fecha,
+        fecha_completado: fechaPago,
         banco_destino: bancoActual,
-        valor_pagado: valor // Nuevo campo para guardar el valor pagado
+        valor_pagado: valor
       })
       .eq('id', idPago);
 
-    // Refrescar datos
-    await cargarPagosPendientes();
-    await cargarMovimientosDesdeSupabase();
-    mostrarAlerta("✅ Pago registrado correctamente", "success");
+    if (!updateError) {
+      await cargarPagosPendientes();
+      await cargarMovimientosDesdeSupabase();
+      mostrarAlerta("✅ Pago registrado correctamente", "success");
+    } else {
+      console.error("Error al actualizar pago pendiente:", updateError);
+      mostrarAlerta("Error al marcar el pago como completado", "error");
+    }
+  } else {
+    console.error("Error al registrar gasto:", gastoError);
+    mostrarAlerta("Error al registrar el pago", "error");
   }
 }
 
@@ -1629,41 +1636,51 @@ async function cargarPagosPendientes() {
         ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
         : "Sin fecha";
       
+      const fechaPago = pago.fecha_completado 
+        ? new Date(pago.fecha_completado).toLocaleDateString("es-CO", { day: 'numeric', month: 'short', year: 'numeric' })
+        : "";
+      
       const hoy = new Date();
       const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
-      const estaVencido = fechaVenc && fechaVenc < hoy;
+      const estaVencido = fechaVenc && fechaVenc < hoy && !pago.completado;
       
       pagoDiv.innerHTML = `
         <div class="flex-1">
           <div class="flex items-start justify-between">
-            <p class="font-medium ${estaVencido && !pago.completado ? 'text-red-600' : ''}">
+            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">
               ${pago.descripcion}
               ${pago.completado ? '<span class="ml-2 text-green-600 text-sm">(Pagado)</span>' : ''}
             </p>
             <span class="ml-2 font-bold">${formatoMoneda(pago.completado ? pago.valor_pagado || pago.valor : pago.valor)}</span>
           </div>
-          <div class="flex items-center text-sm text-gray-500 mt-1">
-            <i class="fas fa-university mr-1 text-xs"></i>
-            <span class="mr-3">${pago.banco_destino || 'Sin banco asignado'}</span>
-            <i class="fas fa-calendar-day mr-1 text-xs"></i>
-            <span class="${estaVencido && !pago.completado ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
-            ${pago.completado ? `<i class="fas fa-check-circle ml-2 text-green-500"></i>` : ''}
+          <div class="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-2">
+            <span class="flex items-center">
+              <i class="fas fa-university mr-1 text-xs"></i>
+              ${pago.banco_destino || 'Sin banco asignado'}
+            </span>
+            <span class="flex items-center ${estaVencido ? 'text-red-500 font-semibold' : ''}">
+              <i class="fas fa-calendar-day mr-1 text-xs"></i>
+              ${fechaVencimiento}
+            </span>
+            ${pago.completado ? `
+              <span class="flex items-center text-green-600">
+                <i class="fas fa-check-circle mr-1 text-xs"></i>
+                Pagado el ${fechaPago}
+              </span>
+            ` : ''}
           </div>
         </div>
         <div class="flex space-x-2 ml-4">
-          <!-- Botón de editar -->
           <button onclick="editarPagoPendiente(${pago.id})" 
             class="text-blue-500 hover:text-blue-700 p-1" title="Editar">
             <i class="fas fa-edit"></i>
           </button>
-          <!-- Botón de marcar como pagado (solo si no está completado) -->
           ${!pago.completado ? `
             <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
               class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
               <i class="fas fa-check-circle"></i>
             </button>
           ` : ''}
-          <!-- Botón de eliminar -->
           <button onclick="eliminarPagoPendiente(${pago.id})" 
             class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
             <i class="fas fa-trash-alt"></i>
