@@ -1632,7 +1632,7 @@ async function cargarPagosPendientes() {
     
     pagosPorCategoria[categoria].forEach(pago => {
       const pagoDiv = document.createElement("div");
-      pagoDiv.className = `border p-3 rounded-lg shadow-sm ${pago.completado ? 'bg-green-50' : 'bg-white'}`;
+      pagoDiv.className = `border p-3 rounded-lg shadow-sm ${pago.completado ? 'bg-green-100' : 'bg-white'}`;
       
       const fechaVencimiento = pago.fecha_vencimiento 
         ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
