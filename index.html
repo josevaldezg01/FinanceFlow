@@ -1636,204 +1636,117 @@ pagoDiv.innerHTML = `
 }
 
 // Función auxiliar mejorada
+// Función auxiliar mejorada para agregar compras a crédito
 function agregarNuevaCompra() {
-  const listaCompras = document.getElementById('lista-compras');
-  
-  if (!listaCompras) {
-    console.error('Elemento lista-compras no encontrado');
-    return;
-  }
-
-  Swal.fire({
-    title: 'Agregar Compra a Crédito',
-    html: `
-      <div class="text-left space-y-3">
-        <div>
-          <label class="block text-sm font-medium mb-1">Descripción</label>
-          <input id="compra-descripcion" class="swal2-input" placeholder="Ej: Compra en Amazon">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Valor Total</label>
-          <input type="number" id="compra-valor" class="swal2-input" placeholder="Ej: 1200000">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Número de Cuotas</label>
-          <input type="number" id="compra-cuotas" class="swal2-input" value="1" min="1">
-        </div>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Agregar',
-    cancelButtonText: 'Cancelar',
-    focusConfirm: false,
-    preConfirm: () => {
-      const valor = parseFloat(document.getElementById('compra-valor').value);
-      const cuotas = parseInt(document.getElementById('compra-cuotas').value);
-      
-      if (!valor || !cuotas) {
-        Swal.showValidationMessage('Todos los campos son requeridos');
-        return false;
-      }
-
-      return {
-        descripcion: document.getElementById('compra-descripcion').value,
-        valor: valor,
-        cuotas: cuotas,
-        cuotasRestantes: cuotas,
-        valorPagado: 0
-      };
+  try {
+    // 1. Verificar existencia del elemento contenedor
+    const listaCompras = document.getElementById('lista-compras');
+    if (!listaCompras) {
+      mostrarAlerta("Error: No se encontró el contenedor de compras", "error");
+      return null;
     }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const compra = result.value;
-      
+
+    // 2. Mostrar modal para ingresar datos de la compra
+    const { value: compra } = await Swal.fire({
+      title: 'Agregar Compra a Crédito',
+      html: `
+        <div class="text-left space-y-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Descripción*</label>
+            <input id="compra-descripcion" class="swal2-input" placeholder="Ej: Compra en Amazon" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Valor Total*</label>
+            <input type="number" id="compra-valor" class="swal2-input" placeholder="Ej: 1200000" min="1" step="0.01" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Número de Cuotas*</label>
+            <input type="number" id="compra-cuotas" class="swal2-input" value="1" min="1" required>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Agregar',
+      cancelButtonText: 'Cancelar',
+      focusConfirm: false,
+      backdrop: true,
+      allowOutsideClick: false,
+      preConfirm: () => {
+        try {
+          const descripcion = document.getElementById('compra-descripcion').value.trim();
+          const valor = parseFloat(document.getElementById('compra-valor').value);
+          const cuotas = parseInt(document.getElementById('compra-cuotas').value);
+
+          // Validaciones mejoradas
+          if (!descripcion || descripcion.length < 3) {
+            Swal.showValidationMessage('La descripción debe tener al menos 3 caracteres');
+            return false;
+          }
+          if (isNaN(valor) {
+            Swal.showValidationMessage('Ingrese un valor numérico válido');
+            return false;
+          }
+          if (isNaN(cuotas)) {
+            Swal.showValidationMessage('Ingrese un número de cuotas válido');
+            return false;
+          }
+
+          return {
+            descripcion: descripcion,
+            valor: valor,
+            cuotas: cuotas,
+            cuotasRestantes: cuotas,
+            valorPagado: 0,
+            fechaRegistro: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error("Error en validación:", error);
+          Swal.showValidationMessage('Ocurrió un error al validar los datos');
+          return false;
+        }
+      }
+    });
+
+    // 3. Procesar la compra si se confirmó
+    if (compra) {
       // Limpiar mensaje de "no hay compras" si existe
       if (listaCompras.innerHTML.includes('No hay compras')) {
         listaCompras.innerHTML = '';
       }
 
-      // Crear elemento de compra
+      // Crear elemento visual para la compra
       const compraDiv = document.createElement('div');
-      compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center';
-      compraDiv.dataset.index = Date.now(); // ID único
+      compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors animate-fade-in';
+      compraDiv.dataset.compra = JSON.stringify(compra);
       compraDiv.innerHTML = `
-        <div>
-          <p class="font-medium">${compra.descripcion}</p>
-          <p class="text-sm">${formatoMoneda(compra.valor)} | ${compra.cuotas}/${compra.cuotas} cuotas</p>
+        <div class="flex-1 min-w-0">
+          <p class="font-medium truncate">${compra.descripcion}</p>
+          <p class="text-sm text-gray-600">
+            ${formatoMoneda(compra.valor)} | 
+            <span class="font-semibold">${compra.cuotasRestantes}/${compra.cuotas}</span> cuotas | 
+            ${formatoMoneda(compra.valor / compra.cuotas)}/mes
+          </p>
         </div>
-        <button type="button" class="text-red-500">
-          <i class="fas fa-trash"></i>
+        <button type="button" class="text-red-500 hover:text-red-700 p-1" title="Eliminar compra">
+          <i class="fas fa-trash-alt"></i>
         </button>
       `;
-      
-      // Asignar evento de eliminación
+
+      // Configurar evento de eliminación
       compraDiv.querySelector('button').addEventListener('click', function() {
-        compraDiv.remove();
+        this.closest('div').remove();
       });
-      
+
+      // Agregar al contenedor con animación
       listaCompras.appendChild(compraDiv);
+      
+      return compra;
     }
-  });
-}
-// Función auxiliar para agregar compras (debe estar en el ámbito global)
-function agregarNuevaCompra() {
-  // Verificación robusta del elemento lista-compras
-  const getListaCompras = () => {
-    const lista = document.getElementById('lista-compras');
-    if (!lista) {
-      console.error('Elemento lista-compras no encontrado en el DOM');
-      mostrarAlerta("Error técnico: No se puede acceder a la lista de compras", "error");
-    }
-    return lista;
-  };
-
-  const listaCompras = getListaCompras();
-  if (!listaCompras) return;
-
-  Swal.fire({
-    title: 'Agregar Compra a Crédito',
-    html: `
-      <div class="text-left space-y-3">
-        <div>
-          <label class="block text-sm font-medium mb-1">Descripción</label>
-          <input id="compra-descripcion" class="swal2-input" placeholder="Ej: Compra en Amazon" required>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Valor Total</label>
-          <input type="number" id="compra-valor" class="swal2-input" placeholder="Ej: 1200000" min="1" required>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Número de Cuotas</label>
-          <input type="number" id="compra-cuotas" class="swal2-input" value="1" min="1" required>
-        </div>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Agregar',
-    cancelButtonText: 'Cancelar',
-    focusConfirm: false,
-    backdrop: true,
-    allowOutsideClick: false,
-    preConfirm: () => {
-      try {
-        const descripcion = document.getElementById('compra-descripcion').value.trim();
-        const valor = parseFloat(document.getElementById('compra-valor').value);
-        const cuotas = parseInt(document.getElementById('compra-cuotas').value);
-        
-// Validaciones mejoradas
-if (!descripcion || descripcion.length < 3) {
-  Swal.showValidationMessage('Descripción debe tener al menos 3 caracteres');
-  return false;
-}
-
-if (isNaN(valor) || valor <= 0) {  // Validación para números positivos
-  Swal.showValidationMessage('Ingrese un valor numérico válido (mayor que 0)');
-  return false;
-}
-
-if (isNaN(cuotas) || cuotas <= 0 || !Number.isInteger(cuotas)) {  // Validación para enteros positivos
-  Swal.showValidationMessage('Ingrese un número entero de cuotas válido (ej: 1, 2, 3...)');
-  return false;
-}
-
-        return {
-          descripcion: descripcion,
-          valor: valor,
-          cuotas: cuotas,
-          cuotasRestantes: cuotas,
-          valorPagado: 0,
-          fechaRegistro: new Date().toISOString()
-        };
-      } catch (error) {
-        console.error("Error al validar compra:", error);
-        Swal.showValidationMessage('Ocurrió un error al procesar los datos');
-        return false;
-      }
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      try {
-        const compra = result.value;
-        
-        // Limpiar mensaje de "no hay compras" si existe
-        if (listaCompras.innerHTML.includes('No hay compras')) {
-          listaCompras.innerHTML = '';
-        }
-
-        // Crear elemento de forma segura
-        const compraDiv = document.createElement('div');
-        compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors';
-        compraDiv.innerHTML = `
-          <div class="flex-1 min-w-0">
-            <p class="font-medium truncate">${compra.descripcion}</p>
-            <p class="text-sm text-gray-600">
-              ${formatoMoneda(compra.valor)} | 
-              <span class="font-semibold">${compra.cuotasRestantes}/${compra.cuotas}</span> cuotas | 
-              ${formatoMoneda(compra.valor / compra.cuotas)}/mes
-            </p>
-          </div>
-          <button type="button" class="text-red-500 hover:text-red-700 p-1">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        `;
-
-        // Manejo de eventos mejorado
-        const deleteBtn = compraDiv.querySelector('button');
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          compraDiv.remove();
-        });
-
-        // Agregar con animación
-        listaCompras.appendChild(compraDiv);
-        compraDiv.style.animation = 'fadeIn 0.3s ease-out';
-        
-      } catch (error) {
-        console.error("Error al agregar compra:", error);
-        mostrarAlerta("Error al agregar la compra", "error");
-      }
-    }
-  });
+  } catch (error) {
+    console.error("Error en agregarNuevaCompra:", error);
+    mostrarAlerta("Error al agregar la compra", "error");
+  }
+  return null;
 }
 
 // Añade esto a tu CSS si quieres la animación:
