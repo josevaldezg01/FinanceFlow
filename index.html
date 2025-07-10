@@ -1635,9 +1635,8 @@ pagoDiv.innerHTML = `
   }
 }
 
-// Función auxiliar mejorada
-// Función auxiliar mejorada para agregar compras a crédito
-function agregarNuevaCompra() {
+// Función auxiliar mejorada para agregar compras a crédito (AHORA CON async)
+async function agregarNuevaCompra() {
   try {
     // 1. Verificar existencia del elemento contenedor
     const listaCompras = document.getElementById('lista-compras');
@@ -1646,7 +1645,7 @@ function agregarNuevaCompra() {
       return null;
     }
 
-    // 2. Mostrar modal para ingresar datos de la compra
+    // 2. Mostrar modal para ingresar datos de la compra (AHORA CON await)
     const { value: compra } = await Swal.fire({
       title: 'Agregar Compra a Crédito',
       html: `
@@ -1682,12 +1681,12 @@ function agregarNuevaCompra() {
             Swal.showValidationMessage('La descripción debe tener al menos 3 caracteres');
             return false;
           }
-          if (isNaN(valor) {
-            Swal.showValidationMessage('Ingrese un valor numérico válido');
+          if (isNaN(valor) || valor <= 0) {
+            Swal.showValidationMessage('Ingrese un valor numérico válido (mayor que 0)');
             return false;
           }
-          if (isNaN(cuotas)) {
-            Swal.showValidationMessage('Ingrese un número de cuotas válido');
+          if (isNaN(cuotas) || cuotas <= 0) {
+            Swal.showValidationMessage('Ingrese un número de cuotas válido (mayor que 0)');
             return false;
           }
 
@@ -1737,7 +1736,7 @@ function agregarNuevaCompra() {
         this.closest('div').remove();
       });
 
-      // Agregar al contenedor con animación
+      // Agregar al contenedor
       listaCompras.appendChild(compraDiv);
       
       return compra;
