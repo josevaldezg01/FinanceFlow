@@ -1760,21 +1760,21 @@ function agregarNuevaCompra() {
         const valor = parseFloat(document.getElementById('compra-valor').value);
         const cuotas = parseInt(document.getElementById('compra-cuotas').value);
         
-        // Validaciones mejoradas
-        if (!descripcion || descripcion.length < 3) {
-          Swal.showValidationMessage('Descripción debe tener al menos 3 caracteres');
-          return false;
-        }
-        
-        if (isNaN(valor) {
-          Swal.showValidationMessage('Valor debe ser un número válido');
-          return false;
-        }
+// Validaciones mejoradas
+if (!descripcion || descripcion.length < 3) {
+  Swal.showValidationMessage('Descripción debe tener al menos 3 caracteres');
+  return false;
+}
 
-        if (isNaN(cuotas) {
-          Swal.showValidationMessage('Número de cuotas debe ser un número válido');
-          return false;
-        }
+if (isNaN(valor) || valor <= 0) {  // Validación para números positivos
+  Swal.showValidationMessage('Ingrese un valor numérico válido (mayor que 0)');
+  return false;
+}
+
+if (isNaN(cuotas) || cuotas <= 0 || !Number.isInteger(cuotas)) {  // Validación para enteros positivos
+  Swal.showValidationMessage('Ingrese un número entero de cuotas válido (ej: 1, 2, 3...)');
+  return false;
+}
 
         return {
           descripcion: descripcion,
