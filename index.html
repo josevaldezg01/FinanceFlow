@@ -1576,57 +1576,76 @@ document.getElementById('btn-agregar-compra')?.addEventListener('click', async (
     const nuevaCompra = await agregarNuevaCompra();
     if (!nuevaCompra) return;
 
-    // Pequeña espera para asegurar que el DOM esté listo
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
-    // Buscar el elemento dentro del modal primero
-    const modal = Swal.getPopup(); // Usamos el modal de SweetAlert directamente
-    const listaCompras = modal.querySelector('#lista-compras');
+    // Solución definitiva con reintentos
+    const listaCompras = await waitForElement('#lista-compras');
     
     if (!listaCompras) {
-      console.warn("Elemento 'lista-compras' no encontrado en el modal. Buscando globalmente...");
-      const listaComprasGlobal = document.querySelector('#lista-compras');
-      if (!listaComprasGlobal) {
-        console.error("No se encontró 'lista-compras' en ningún lugar del DOM");
-        mostrarAlerta("Error técnico. Por favor recarga la página.", "error");
-        return;
-      }
-      listaCompras = listaComprasGlobal;
+      mostrarAlerta("No se pudo cargar la sección de compras. Intente nuevamente.", "error");
+      return;
     }
 
-    // Manejo seguro del contenido
-    if (listaCompras.textContent && listaCompras.textContent.includes('No hay compras')) {
+    // Limpiar mensaje si no hay compras
+    if (listaCompras.textContent.includes('No hay compras')) {
       listaCompras.innerHTML = '';
     }
     
-    // Crear elemento de compra con estilos mejorados
-    const compraDiv = document.createElement('div');
-    compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-gray-50';
-    compraDiv.dataset.index = Date.now();
-    compraDiv.innerHTML = `
-      <div class="flex-1">
-        <p class="font-medium text-sm">${nuevaCompra.descripcion}</p>
-        <p class="text-xs text-gray-600">
-          ${formatoMoneda(nuevaCompra.valor)} | 
-          ${nuevaCompra.cuotasRestantes}/${nuevaCompra.cuotas} cuotas | 
-          ${formatoMoneda(nuevaCompra.valor / nuevaCompra.cuotas)}/mes
-        </p>
-      </div>
-      <button type="button" onclick="this.closest('div').remove()" 
-        class="text-red-400 hover:text-red-600 p-1 transition-colors">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
-    
-    // Agregar animación
-    compraDiv.style.animation = 'fadeIn 0.3s ease-out forwards';
+    // Crear y agregar nueva compra
+    const compraDiv = createCompraElement(nuevaCompra);
     listaCompras.appendChild(compraDiv);
 
   } catch (error) {
-    console.error("Error al agregar compra:", error);
-    mostrarAlerta("Ocurrió un error al agregar la compra", "error");
+    console.error("Error:", error);
+    mostrarAlerta("Error al agregar compra", "error");
   }
 });
+
+// Función auxiliar para esperar elemento
+function waitForElement(selector, timeout = 2000) {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    const checkInterval = 50;
+    
+    const checkForElement = () => {
+      const element = document.querySelector(selector);
+      if (element) {
+        resolve(element);
+        return;
+      }
+      
+      if (Date.now() - startTime >= timeout) {
+        console.error(`Elemento ${selector} no encontrado después de ${timeout}ms`);
+        resolve(null);
+        return;
+      }
+      
+      setTimeout(checkForElement, checkInterval);
+    };
+    
+    checkForElement();
+  });
+}
+
+// Función auxiliar para crear elemento de compra
+function createCompraElement(compra) {
+  const compraDiv = document.createElement('div');
+  compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-gray-50';
+  compraDiv.style.animation = 'fadeIn 0.3s ease-out forwards';
+  compraDiv.innerHTML = `
+    <div class="flex-1">
+      <p class="font-medium text-sm">${compra.descripcion}</p>
+      <p class="text-xs text-gray-600">
+        ${formatoMoneda(compra.valor)} | 
+        ${compra.cuotasRestantes}/${compra.cuotas} cuotas | 
+        ${formatoMoneda(compra.valor / compra.cuotas)}/mes
+      </p>
+    </div>
+    <button type="button" onclick="this.closest('div').remove()" 
+      class="text-red-400 hover:text-red-600 p-1 transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  return compraDiv;
+}
     },
     preConfirm: () => {
       const valores = {
