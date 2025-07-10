@@ -1528,125 +1528,69 @@ async function editarPagoPendiente(idPago) {
           <input id="swal-descripcion" value="${pago.descripcion}" class="swal2-input">
         </div>
         
-        ${esTarjetaCredito ? `
-          <div>
-            <label class="block text-sm font-medium mb-1">Valor Original</label>
-            <input type="number" id="swal-valor-original" value="${datosCredito.valorOriginal}" class="swal2-input">
-          </div>
-        ` : `
-          <div>
-            <label class="block text-sm font-medium mb-1">Valor</label>
-            <input type="number" id="swal-valor" value="${pago.valor}" class="swal2-input">
-          </div>
-        `}
-        
-        <div>
-          <label class="block text-sm font-medium mb-1">Banco Destino</label>
-          <select id="swal-banco" class="swal2-input">
-            <option value="">-- Sin asignar --</option>
-            ${Object.keys(bancos).map(banco => 
-              `<option value="${banco}" ${banco === pago.banco_destino ? 'selected' : ''}>${banco}</option>`
-            ).join('')}
-          </select>
+    ${esTarjetaCredito ? `
+      <div class="border-t pt-3">
+        <h3 class="font-semibold mb-2">Compras a Crédito</h3>
+        <div id="swal-lista-compras" class="mb-3 max-h-40 overflow-y-auto">
+          ${comprasHTML || '<p class="text-gray-500 text-sm">No hay compras registradas</p>'}
         </div>
-
-        ${esTarjetaCredito ? `
-          <div class="border-t pt-3">
-            <h3 class="font-semibold mb-2">Compras a Crédito</h3>
-            <div id="lista-compras" class="mb-3 max-h-40 overflow-y-auto">
-              ${comprasHTML || '<p class="text-gray-500 text-sm">No hay compras registradas</p>'}
-            </div>
-            
-            <button type="button" id="btn-agregar-compra" class="w-full bg-indigo-100 text-indigo-700 py-1 px-3 rounded text-sm flex items-center justify-center">
-              <i class="fas fa-plus mr-2"></i> Agregar Compra
-            </button>
-          </div>
-        ` : ''}
+        
+        <button type="button" id="swal-btn-agregar-compra" 
+          class="w-full bg-indigo-100 text-indigo-700 py-1 px-3 rounded text-sm flex items-center justify-center">
+          <i class="fas fa-plus mr-2"></i> Agregar Compra
+        </button>
       </div>
-    `,
+    ` : ''}
+  </div>
+`,
     width: '600px',
     showCancelButton: true,
     confirmButtonText: 'Guardar',
     cancelButtonText: 'Cancelar',
     focusConfirm: false,
-    didOpen: () => {
-      // Asignar evento después de que el modal esté abierto
-document.getElementById('btn-agregar-compra')?.addEventListener('click', async () => {
-  try {
-    const nuevaCompra = await agregarNuevaCompra();
-    if (!nuevaCompra) return;
+didOpen: () => {
+  // Configurar el botón de agregar compra
+  document.getElementById('swal-btn-agregar-compra')?.addEventListener('click', async () => {
+    try {
+      const nuevaCompra = await agregarNuevaCompra();
+      if (!nuevaCompra) return;
 
-    // Solución definitiva con reintentos
-    const listaCompras = await waitForElement('#lista-compras');
-    
-    if (!listaCompras) {
-      mostrarAlerta("No se pudo cargar la sección de compras. Intente nuevamente.", "error");
-      return;
-    }
-
-    // Limpiar mensaje si no hay compras
-    if (listaCompras.textContent.includes('No hay compras')) {
-      listaCompras.innerHTML = '';
-    }
-    
-    // Crear y agregar nueva compra
-    const compraDiv = createCompraElement(nuevaCompra);
-    listaCompras.appendChild(compraDiv);
-
-  } catch (error) {
-    console.error("Error:", error);
-    mostrarAlerta("Error al agregar compra", "error");
-  }
-});
-
-// Función auxiliar para esperar elemento
-function waitForElement(selector, timeout = 2000) {
-  return new Promise((resolve) => {
-    const startTime = Date.now();
-    const checkInterval = 50;
-    
-    const checkForElement = () => {
-      const element = document.querySelector(selector);
-      if (element) {
-        resolve(element);
+      const listaCompras = document.getElementById('swal-lista-compras');
+      if (!listaCompras) {
+        mostrarAlerta("Error al acceder a la lista de compras", "error");
         return;
       }
-      
-      if (Date.now() - startTime >= timeout) {
-        console.error(`Elemento ${selector} no encontrado después de ${timeout}ms`);
-        resolve(null);
-        return;
+
+      // Limpiar mensaje si no hay compras
+      if (listaCompras.innerHTML.includes('No hay compras')) {
+        listaCompras.innerHTML = '';
       }
-      
-      setTimeout(checkForElement, checkInterval);
-    };
-    
-    checkForElement();
+
+      // Crear elemento para la nueva compra
+      const compraDiv = document.createElement('div');
+      compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-gray-50';
+      compraDiv.innerHTML = `
+        <div class="flex-1">
+          <p class="font-medium text-sm">${nuevaCompra.descripcion}</p>
+          <p class="text-xs text-gray-600">
+            ${formatoMoneda(nuevaCompra.valor)} | 
+            ${nuevaCompra.cuotasRestantes}/${nuevaCompra.cuotas} cuotas | 
+            ${formatoMoneda(nuevaCompra.valor / nuevaCompra.cuotas)}/mes
+          </p>
+        </div>
+        <button type="button" onclick="this.closest('div').remove()" 
+          class="text-red-400 hover:text-red-600 p-1">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+
+      listaCompras.appendChild(compraDiv);
+    } catch (error) {
+      console.error("Error al agregar compra:", error);
+      mostrarAlerta("Error al agregar compra", "error");
+    }
   });
-}
-
-// Función auxiliar para crear elemento de compra
-function createCompraElement(compra) {
-  const compraDiv = document.createElement('div');
-  compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-gray-50';
-  compraDiv.style.animation = 'fadeIn 0.3s ease-out forwards';
-  compraDiv.innerHTML = `
-    <div class="flex-1">
-      <p class="font-medium text-sm">${compra.descripcion}</p>
-      <p class="text-xs text-gray-600">
-        ${formatoMoneda(compra.valor)} | 
-        ${compra.cuotasRestantes}/${compra.cuotas} cuotas | 
-        ${formatoMoneda(compra.valor / compra.cuotas)}/mes
-      </p>
-    </div>
-    <button type="button" onclick="this.closest('div').remove()" 
-      class="text-red-400 hover:text-red-600 p-1 transition-colors">
-      <i class="fas fa-times"></i>
-    </button>
-  `;
-  return compraDiv;
-}
-    },
+},
     preConfirm: () => {
       const valores = {
         descripcion: document.getElementById('swal-descripcion').value,
@@ -1731,29 +1675,22 @@ function createCompraElement(compra) {
 // Función auxiliar mejorada para agregar compras a crédito (AHORA CON async)
 async function agregarNuevaCompra() {
   try {
-    // 1. Verificar existencia del elemento contenedor
-    const listaCompras = document.getElementById('lista-compras');
-    if (!listaCompras) {
-      mostrarAlerta("Error: No se encontró el contenedor de compras", "error");
-      return null;
-    }
-
-    // 2. Mostrar modal para ingresar datos de la compra (AHORA CON await)
+    // 1. Mostrar modal para ingresar datos de la compra
     const { value: compra } = await Swal.fire({
       title: 'Agregar Compra a Crédito',
       html: `
         <div class="text-left space-y-3">
           <div>
             <label class="block text-sm font-medium mb-1">Descripción*</label>
-            <input id="compra-descripcion" class="swal2-input" placeholder="Ej: Compra en Amazon" required>
+            <input id="swal-compra-descripcion" class="swal2-input" placeholder="Ej: Compra en Amazon" required>
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Valor Total*</label>
-            <input type="number" id="compra-valor" class="swal2-input" placeholder="Ej: 1200000" min="1" step="0.01" required>
+            <input type="number" id="swal-compra-valor" class="swal2-input" placeholder="Ej: 1200000" min="1" step="0.01" required>
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Número de Cuotas*</label>
-            <input type="number" id="compra-cuotas" class="swal2-input" value="1" min="1" required>
+            <input type="number" id="swal-compra-cuotas" class="swal2-input" value="1" min="1" required>
           </div>
         </div>
       `,
@@ -1765,11 +1702,11 @@ async function agregarNuevaCompra() {
       allowOutsideClick: false,
       preConfirm: () => {
         try {
-          const descripcion = document.getElementById('compra-descripcion').value.trim();
-          const valor = parseFloat(document.getElementById('compra-valor').value);
-          const cuotas = parseInt(document.getElementById('compra-cuotas').value);
+          const descripcion = document.getElementById('swal-compra-descripcion').value.trim();
+          const valor = parseFloat(document.getElementById('swal-compra-valor').value);
+          const cuotas = parseInt(document.getElementById('swal-compra-cuotas').value);
 
-          // Validaciones mejoradas
+          // Validaciones
           if (!descripcion || descripcion.length < 3) {
             Swal.showValidationMessage('La descripción debe tener al menos 3 caracteres');
             return false;
@@ -1799,46 +1736,13 @@ async function agregarNuevaCompra() {
       }
     });
 
-    // 3. Procesar la compra si se confirmó
-    if (compra) {
-      // Limpiar mensaje de "no hay compras" si existe
-      if (listaCompras.innerHTML.includes('No hay compras')) {
-        listaCompras.innerHTML = '';
-      }
+    return compra; // Retorna directamente el objeto compra
 
-      // Crear elemento visual para la compra
-      const compraDiv = document.createElement('div');
-      compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors animate-fade-in';
-      compraDiv.dataset.compra = JSON.stringify(compra);
-      compraDiv.innerHTML = `
-        <div class="flex-1 min-w-0">
-          <p class="font-medium truncate">${compra.descripcion}</p>
-          <p class="text-sm text-gray-600">
-            ${formatoMoneda(compra.valor)} | 
-            <span class="font-semibold">${compra.cuotasRestantes}/${compra.cuotas}</span> cuotas | 
-            ${formatoMoneda(compra.valor / compra.cuotas)}/mes
-          </p>
-        </div>
-        <button type="button" class="text-red-500 hover:text-red-700 p-1" title="Eliminar compra">
-          <i class="fas fa-trash-alt"></i>
-        </button>
-      `;
-
-      // Configurar evento de eliminación
-      compraDiv.querySelector('button').addEventListener('click', function() {
-        this.closest('div').remove();
-      });
-
-      // Agregar al contenedor
-      listaCompras.appendChild(compraDiv);
-      
-      return compra;
-    }
   } catch (error) {
     console.error("Error en agregarNuevaCompra:", error);
     mostrarAlerta("Error al agregar la compra", "error");
+    return null;
   }
-  return null;
 }
 
 // Añade esto a tu CSS si quieres la animación:
