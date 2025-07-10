@@ -1337,32 +1337,43 @@ async function agregarPagoPendiente() {
   const descripcion = document.getElementById("pagoDescripcion").value;
   const valor = Number(document.getElementById("pagoValor").value);
   const categoria = document.getElementById("pagoCategoria").value;
-  const banco = document.getElementById("pagoBanco").value; // Puede ser "" (vacío)
+  const banco = document.getElementById("pagoBanco").value;
   const fechaVencimiento = document.getElementById("pagoFechaVencimiento").value;
 
-  // Elimina la validación de !banco (cambia esta condición)
-  if (!descripcion || !valor || !categoria) { // ← Banco ya no es obligatorio
+  if (!descripcion || !valor || !categoria) {
     mostrarAlerta("Por favor completa descripción, valor y categoría", "error");
     return;
   }
 
-  const { error } = await supabase.from('pagos_pendientes').insert([
-    {
-      descripcion,
-      valor,
-      categoria,
-      banco_destino: banco || null, // Guarda NULL si no se seleccionó banco
-      fecha_vencimiento: fechaVencimiento || null,
-      completado: false
-    }
-  ]);
+  // Objeto base para guardar
+  const pagoData = {
+    descripcion,
+    valor,
+    categoria,
+    banco_destino: banco || null,
+    fecha_vencimiento: fechaVencimiento || null,
+    completado: false
+  };
+
+  // Si es tarjeta de crédito, agregar estructura de datos_credito
+  if (categoria === "Tarjetas de crédito") {
+    pagoData.datos_credito = {
+      compras: [], // Array vacío inicial
+      valorOriginal: valor, // Guardamos el valor original
+      cuotasTotales: 1, // Valor por defecto
+      cuotasRestantes: 1 // Valor por defecto
+    };
+  }
+
+  const { error } = await supabase.from('pagos_pendientes').insert([pagoData]);
 
   if (error) {
     console.error("Error al guardar pago pendiente:", error);
     mostrarAlerta("Error al guardar el pago pendiente", "error");
     return;
   }
-// Limpiar campos
+
+  // Limpiar campos y actualizar
   document.getElementById("pagoDescripcion").value = "";
   document.getElementById("pagoValor").value = "";
   document.getElementById("pagoCategoria").value = "";
@@ -1471,7 +1482,7 @@ pagoDiv.innerHTML = `
   }
 }
 
-   async function editarPagoPendiente(idPago) {
+async function editarPagoPendiente(idPago) {
   // Obtener datos actuales del pago
   const { data: pago, error } = await supabase
     .from('pagos_pendientes')
@@ -1485,7 +1496,7 @@ pagoDiv.innerHTML = `
   }
 
   const esTarjetaCredito = pago.categoria === "Tarjetas de crédito";
-  const datosCredito = pago.datos_credito ? JSON.parse(pago.datos_credito) : {
+  const datosCredito = pago.datos_credito ? (typeof pago.datos_credito === 'string' ? JSON.parse(pago.datos_credito) : pago.datos_credito) : {
     compras: [],
     cuotasTotales: 1,
     cuotasRestantes: 1,
@@ -1560,9 +1571,31 @@ pagoDiv.innerHTML = `
     focusConfirm: false,
     didOpen: () => {
       // Asignar evento después de que el modal esté abierto
-      document.getElementById('btn-agregar-compra')?.addEventListener('click', agregarNuevaCompra);
+      document.getElementById('btn-agregar-compra')?.addEventListener('click', async () => {
+        const nuevaCompra = await agregarNuevaCompra();
+        if (nuevaCompra) {
+          const listaCompras = document.getElementById('lista-compras');
+          if (listaCompras.innerHTML.includes('No hay compras')) {
+            listaCompras.innerHTML = '';
+          }
+          
+          const compraDiv = document.createElement('div');
+          compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center';
+          compraDiv.dataset.index = Date.now();
+          compraDiv.innerHTML = `
+            <div>
+              <p class="font-medium">${nuevaCompra.descripcion}</p>
+              <p class="text-sm">${formatoMoneda(nuevaCompra.valor)} | ${nuevaCompra.cuotasRestantes}/${nuevaCompra.cuotas} cuotas</p>
+            </div>
+            <button type="button" onclick="this.closest('div').remove()" class="text-red-500">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          listaCompras.appendChild(compraDiv);
+        }
+      });
     },
-    preConfirm: async () => {
+    preConfirm: () => {
       const valores = {
         descripcion: document.getElementById('swal-descripcion').value,
         banco: document.getElementById('swal-banco').value || null
@@ -1585,16 +1618,24 @@ pagoDiv.innerHTML = `
               valor,
               cuotas: totales,
               cuotasRestantes: restantes,
-              valorPagado: 0
+              valorPagado: 0,
+              fechaRegistro: new Date().toISOString()
             });
           });
         }
 
         valores.valorOriginal = parseFloat(document.getElementById('swal-valor-original').value);
-        valores.datosCredito = {
-          ...datosCredito,
-          compras: comprasActuales.length > 0 ? comprasActuales : datosCredito.compras
+        valores.datos_credito = {
+          compras: comprasActuales.length > 0 ? comprasActuales : datosCredito.compras,
+          valorOriginal: parseFloat(document.getElementById('swal-valor-original').value),
+          cuotasTotales: comprasActuales.reduce((max, compra) => Math.max(max, compra.cuotas), 1),
+          cuotasRestantes: comprasActuales.reduce((max, compra) => Math.max(max, compra.cuotasRestantes), 1)
         };
+        
+        // Calcular el nuevo valor mensual
+        valores.valor = comprasActuales.reduce((total, compra) => {
+          return total + (compra.cuotasRestantes > 0 ? (compra.valor / compra.cuotas) : 0);
+        }, 0);
       } else {
         valores.valor = parseFloat(document.getElementById('swal-valor').value);
       }
@@ -1607,32 +1648,32 @@ pagoDiv.innerHTML = `
     // Preparar datos para actualizar
     const updateData = {
       descripcion: formValues.descripcion,
-      banco_destino: formValues.banco
+      banco_destino: formValues.banco,
+      valor: formValues.valor
     };
 
     if (esTarjetaCredito) {
-      updateData.datos_credito = JSON.stringify(formValues.datosCredito);
-      updateData.valor = formValues.datosCredito.compras.reduce((total, compra) => {
-        return total + (compra.cuotasRestantes > 0 ? (compra.valor / compra.cuotas) : 0);
-      }, 0);
-    } else {
-      updateData.valor = formValues.valor;
+      updateData.datos_credito = formValues.datos_credito;
     }
 
     // Actualizar en Supabase
-    const { error: updateError } = await supabase
+    const { data: updatedPago, error: updateError } = await supabase
       .from('pagos_pendientes')
       .update(updateData)
-      .eq('id', idPago);
+      .eq('id', idPago)
+      .select();
 
     if (!updateError) {
       await cargarPagosPendientes();
       mostrarAlerta("Pago actualizado correctamente", "success");
+      return updatedPago;
     } else {
       console.error("Error al actualizar pago:", updateError);
       mostrarAlerta("Error al actualizar el pago", "error");
+      return null;
     }
   }
+  return null;
 }
 
 // Función auxiliar mejorada para agregar compras a crédito (AHORA CON async)
