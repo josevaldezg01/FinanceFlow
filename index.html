@@ -1571,30 +1571,37 @@ async function editarPagoPendiente(idPago) {
     focusConfirm: false,
     didOpen: () => {
       // Asignar evento después de que el modal esté abierto
-      document.getElementById('btn-agregar-compra')?.addEventListener('click', async () => {
-        const nuevaCompra = await agregarNuevaCompra();
-        if (nuevaCompra) {
-          const listaCompras = document.getElementById('lista-compras');
-          if (listaCompras.innerHTML.includes('No hay compras')) {
-            listaCompras.innerHTML = '';
-          }
-          
-          const compraDiv = document.createElement('div');
-          compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center';
-          compraDiv.dataset.index = Date.now();
-          compraDiv.innerHTML = `
-            <div>
-              <p class="font-medium">${nuevaCompra.descripcion}</p>
-              <p class="text-sm">${formatoMoneda(nuevaCompra.valor)} | ${nuevaCompra.cuotasRestantes}/${nuevaCompra.cuotas} cuotas</p>
-            </div>
-            <button type="button" onclick="this.closest('div').remove()" class="text-red-500">
-              <i class="fas fa-trash"></i>
-            </button>
-          `;
-          listaCompras.appendChild(compraDiv);
-        }
-      });
-    },
+document.getElementById('btn-agregar-compra')?.addEventListener('click', async () => {
+  const nuevaCompra = await agregarNuevaCompra();
+  if (nuevaCompra) {
+    const listaCompras = document.getElementById('lista-compras');
+    
+    // Verificar primero si el elemento existe
+    if (!listaCompras) {
+      console.error("Elemento 'lista-compras' no encontrado en el DOM");
+      return;
+    }
+
+    // Verificar si contiene el texto "No hay compras" (de forma segura)
+    if (listaCompras.textContent.includes('No hay compras')) {
+      listaCompras.innerHTML = '';
+    }
+    
+    const compraDiv = document.createElement('div');
+    compraDiv.className = 'border p-2 rounded mb-2 flex justify-between items-center';
+    compraDiv.dataset.index = Date.now();
+    compraDiv.innerHTML = `
+      <div>
+        <p class="font-medium">${nuevaCompra.descripcion}</p>
+        <p class="text-sm">${formatoMoneda(nuevaCompra.valor)} | ${nuevaCompra.cuotasRestantes}/${nuevaCompra.cuotas} cuotas</p>
+      </div>
+      <button type="button" onclick="this.closest('div').remove()" class="text-red-500">
+        <i class="fas fa-trash"></i>
+      </button>
+    `;
+    listaCompras.appendChild(compraDiv);
+  }
+});
     preConfirm: () => {
       const valores = {
         descripcion: document.getElementById('swal-descripcion').value,
