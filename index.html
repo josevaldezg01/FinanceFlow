@@ -1455,7 +1455,7 @@ pagoDiv.innerHTML = `
   }
 }
 
-    async function editarPagoPendiente(idPago) {
+   async function editarPagoPendiente(idPago) {
   // Obtener datos actuales del pago
   const { data: pago, error } = await supabase
     .from('pagos_pendientes')
@@ -1468,59 +1468,240 @@ pagoDiv.innerHTML = `
     return;
   }
 
-  // Crear modal de edición con SweetAlert2
+  const esTarjetaCredito = pago.categoria === "Tarjetas de crédito";
+  const datosCredito = pago.datos_credito ? JSON.parse(pago.datos_credito) : {
+    compras: [],
+    cuotasTotales: 1,
+    cuotasRestantes: 1,
+    valorOriginal: pago.valor
+  };
+
+  // Crear HTML para las compras existentes
+  let comprasHTML = '';
+  datosCredito.compras.forEach((compra, index) => {
+    comprasHTML += `
+      <div class="border p-2 rounded mb-2 flex justify-between items-center">
+        <div>
+          <p class="font-medium">${compra.descripcion}</p>
+          <p class="text-sm">${formatoMoneda(compra.valor)} | ${compra.cuotasRestantes}/${compra.cuotas} cuotas</p>
+        </div>
+        <button type="button" onclick="eliminarCompraCredito(this, ${index})" class="text-red-500">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+  });
+
   const { value: formValues } = await Swal.fire({
     title: 'Editar pago pendiente',
     html: `
-      <div class="text-left">
-        <label class="block text-sm font-medium mb-1">Descripción</label>
-        <input id="swal-descripcion" value="${pago.descripcion}" class="swal2-input">
+      <div class="text-left space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Descripción</label>
+          <input id="swal-descripcion" value="${pago.descripcion}" class="swal2-input">
+        </div>
         
-        <label class="block text-sm font-medium mb-1 mt-3">Valor</label>
-        <input type="number" id="swal-valor" value="${pago.valor}" class="swal2-input">
+        ${esTarjetaCredito ? `
+          <div>
+            <label class="block text-sm font-medium mb-1">Valor Original</label>
+            <input type="number" id="swal-valor-original" value="${datosCredito.valorOriginal}" class="swal2-input">
+          </div>
+        ` : `
+          <div>
+            <label class="block text-sm font-medium mb-1">Valor</label>
+            <input type="number" id="swal-valor" value="${pago.valor}" class="swal2-input">
+          </div>
+        `}
         
-        <label class="block text-sm font-medium mb-1 mt-3">Banco Destino</label>
-        <select id="swal-banco" class="swal2-input">
-          <option value="">-- Sin asignar --</option>
-          ${Object.keys(bancos).map(banco => 
-            `<option value="${banco}" ${banco === pago.banco_destino ? 'selected' : ''}>${banco}</option>`
-          ).join('')}
-        </select>
+        <div>
+          <label class="block text-sm font-medium mb-1">Banco Destino</label>
+          <select id="swal-banco" class="swal2-input">
+            <option value="">-- Sin asignar --</option>
+            ${Object.keys(bancos).map(banco => 
+              `<option value="${banco}" ${banco === pago.banco_destino ? 'selected' : ''}>${banco}</option>`
+            ).join('')}
+          </select>
+        </div>
+
+        ${esTarjetaCredito ? `
+          <div class="border-t pt-3">
+            <h3 class="font-semibold mb-2">Compras a Crédito</h3>
+            <div id="lista-compras" class="mb-3 max-h-40 overflow-y-auto">
+              ${comprasHTML || '<p class="text-gray-500 text-sm">No hay compras registradas</p>'}
+            </div>
+            
+            <button type="button" onclick="agregarNuevaCompra()" 
+              class="w-full bg-indigo-100 text-indigo-700 py-1 px-3 rounded text-sm flex items-center justify-center">
+              <i class="fas fa-plus mr-2"></i> Agregar Compra
+            </button>
+          </div>
+        ` : ''}
       </div>
     `,
-    focusConfirm: false,
+    width: '600px',
     showCancelButton: true,
-    preConfirm: () => {
-      return {
+    confirmButtonText: 'Guardar',
+    cancelButtonText: 'Cancelar',
+    focusConfirm: false,
+    preConfirm: async () => {
+      const valores = {
         descripcion: document.getElementById('swal-descripcion').value,
-        valor: parseFloat(document.getElementById('swal-valor').value),
-        banco: document.getElementById('swal-banco').value
+        banco: document.getElementById('swal-banco').value || null
       };
+
+      if (esTarjetaCredito) {
+        valores.valorOriginal = parseFloat(document.getElementById('swal-valor-original').value);
+        valores.datosCredito = datosCredito;
+      } else {
+        valores.valor = parseFloat(document.getElementById('swal-valor').value);
+      }
+
+      return valores;
     }
   });
 
   if (formValues) {
+    // Preparar datos para actualizar
+    const updateData = {
+      descripcion: formValues.descripcion,
+      banco_destino: formValues.banco
+    };
+
+    if (esTarjetaCredito) {
+      updateData.datos_credito = JSON.stringify(formValues.datosCredito);
+      updateData.valor = formValues.datosCredito.compras.reduce((total, compra) => {
+        return total + (compra.cuotasRestantes > 0 ? (compra.valor / compra.cuotas) : 0);
+      }, 0);
+    } else {
+      updateData.valor = formValues.valor;
+    }
+
     // Actualizar en Supabase
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from('pagos_pendientes')
-      .update({
-        descripcion: formValues.descripcion,
-        valor: formValues.valor,
-        banco_destino: formValues.banco || null
-      })
+      .update(updateData)
       .eq('id', idPago);
 
-    if (!error) {
+    if (!updateError) {
       await cargarPagosPendientes();
       mostrarAlerta("Pago actualizado correctamente", "success");
+    } else {
+      console.error("Error al actualizar pago:", updateError);
+      mostrarAlerta("Error al actualizar el pago", "error");
     }
   }
 }
-    
- // Marcar pago como completado y convertirlo en gasto
-// Modificar la función marcarPagoComoCompletado
+
+// Función auxiliar para agregar compras (debe estar en el ámbito global)
+function agregarNuevaCompra() {
+  Swal.fire({
+    title: 'Agregar Compra a Crédito',
+    html: `
+      <div class="text-left space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Descripción</label>
+          <input id="compra-descripcion" class="swal2-input" placeholder="Ej: Compra en Amazon">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Valor Total</label>
+          <input type="number" id="compra-valor" class="swal2-input" placeholder="Ej: 1200000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Número de Cuotas</label>
+          <input type="number" id="compra-cuotas" class="swal2-input" value="1" min="1">
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Agregar',
+    cancelButtonText: 'Cancelar',
+    focusConfirm: false,
+    preConfirm: () => {
+      const valor = parseFloat(document.getElementById('compra-valor').value);
+      const cuotas = parseInt(document.getElementById('compra-cuotas').value);
+      
+      if (!valor || !cuotas) {
+        Swal.showValidationMessage('Todos los campos son requeridos');
+        return false;
+      }
+
+      return {
+        descripcion: document.getElementById('compra-descripcion').value,
+        valor: valor,
+        cuotas: cuotas,
+        cuotasRestantes: cuotas,
+        valorPagado: 0
+      };
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const compra = result.value;
+      const listaCompras = document.getElementById('lista-compras');
+      
+      if (listaCompras.firstChild?.classList?.contains('text-gray-500')) {
+        listaCompras.innerHTML = '';
+      }
+
+      listaCompras.insertAdjacentHTML('beforeend', `
+        <div class="border p-2 rounded mb-2 flex justify-between items-center">
+          <div>
+            <p class="font-medium">${compra.descripcion}</p>
+            <p class="text-sm">${formatoMoneda(compra.valor)} | ${compra.cuotasRestantes}/${compra.cuotas} cuotas</p>
+          </div>
+          <button type="button" onclick="this.parentElement.remove()" class="text-red-500">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `);
+    }
+  });
+}
+
+// Función auxiliar para eliminar compras
+function eliminarCompraCredito(elemento, index) {
+  elemento.closest('div').remove();
+}    
+ // Marcar pago como completado y convertirlo en gasto con la funcion de administracion de cuotas para tarjetas de credito
 async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, bancoActual = "") {
-  // Si no hay banco definido, pedirlo al usuario
+  // 1. Obtener datos actuales del pago
+  const { data: pago, error: fetchError } = await supabase
+    .from('pagos_pendientes')
+    .select('*')
+    .eq('id', idPago)
+    .single();
+
+  if (fetchError) {
+    mostrarAlerta("Error al cargar el pago", "error");
+    return;
+  }
+
+  const esTarjetaCredito = pago.categoria === "Tarjetas de crédito";
+  let datosCredito = pago.datos_credito ? JSON.parse(pago.datos_credito) : null;
+  let valorAPagar = valor; // Valor que se descontará
+
+  // 2. Lógica para tarjetas de crédito (si aplica)
+  if (esTarjetaCredito && datosCredito) {
+    // Actualizar cuotas y calcular valor
+    datosCredito.compras = datosCredito.compras.map(compra => {
+      if (compra.cuotasRestantes > 0) {
+        compra.cuotasRestantes -= 1;
+        compra.valorPagado = (compra.valor / compra.cuotas) * (compra.cuotas - compra.cuotasRestantes);
+      }
+      return compra;
+    });
+
+    // Calcular nuevo valor a pagar (suma de la cuota mensual de cada compra activa)
+    valorAPagar = datosCredito.compras.reduce((total, compra) => {
+      return total + (compra.cuotasRestantes > 0 ? (compra.valor / compra.cuotas) : 0);
+    }, 0);
+
+    // Si no hay cuotas pendientes, marcar como completamente pagado
+    if (valorAPagar <= 0) {
+      datosCredito.completado = true;
+    }
+  }
+
+  // 3. Pedir banco si no está definido (conserva tu lógica original)
   if (!bancoActual) {
     const { value: bancoSeleccionado } = await Swal.fire({
       title: 'Selecciona el banco de pago',
@@ -1532,52 +1713,58 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
       inputValidator: (value) => !value && 'Debes seleccionar un banco'
     });
 
-    if (!bancoSeleccionado) return; // Usuario canceló
+    if (!bancoSeleccionado) return;
     bancoActual = bancoSeleccionado;
   }
 
-  // Verificar saldo si el banco existe
-  if (bancoActual && bancos[bancoActual] < valor) {
+  // 4. Validar saldo (conserva tu lógica original)
+  if (bancoActual && bancos[bancoActual] < valorAPagar) {
     mostrarAlerta(`Saldo insuficiente en ${bancoActual}. Disponible: ${formatoMoneda(bancos[bancoActual])}`, "error");
     return;
   }
 
-  // Registrar el gasto
+  // 5. Registrar el gasto (modificado para usar valorAPagar)
   const fechaPago = new Date().toISOString();
   const { error: gastoError } = await supabase.from('movimientos').insert([{
     tipo: "gasto",
-    valor: valor,
-    descripcion: `Pago completado: ${descripcion}`,
+    valor: valorAPagar,
+    descripcion: `Pago completado: ${descripcion}${esTarjetaCredito ? ' (cuota)' : ''}`,
     categoria: categoria || "Pago pendiente",
     banco_destino: bancoActual,
     fecha: fechaPago
   }]);
 
   if (!gastoError) {
-    // Actualizar el pago como completado (con fecha exacta)
+    // 6. Actualizar el pago pendiente (ahora con manejo de datos_credito)
+    const updateData = {
+      completado: esTarjetaCredito ? datosCredito.completado : true,
+      fecha_completado: fechaPago,
+      banco_destino: bancoActual,
+      valor_pagado: valorAPagar
+    };
+
+    if (esTarjetaCredito) {
+      updateData.datos_credito = JSON.stringify(datosCredito);
+      updateData.valor = valorAPagar; // Actualizar valor pendiente
+    }
+
     const { error: updateError } = await supabase.from('pagos_pendientes')
-      .update({ 
-        completado: true,
-        fecha_completado: fechaPago,
-        banco_destino: bancoActual,
-        valor_pagado: valor
-      })
+      .update(updateData)
       .eq('id', idPago);
 
     if (!updateError) {
       await cargarPagosPendientes();
       await cargarMovimientosDesdeSupabase();
-      mostrarAlerta("✅ Pago registrado correctamente", "success");
+      mostrarAlerta(`✅ ${esTarjetaCredito ? 'Cuota registrada' : 'Pago completado'} correctamente`, "success");
     } else {
       console.error("Error al actualizar pago pendiente:", updateError);
-      mostrarAlerta("Error al marcar el pago como completado", "error");
+      mostrarAlerta("Error al actualizar el pago", "error");
     }
   } else {
     console.error("Error al registrar gasto:", gastoError);
     mostrarAlerta("Error al registrar el pago", "error");
   }
 }
-
 // Modificar la función cargarPagosPendientes para mostrar pagos completados de este mes
 async function cargarPagosPendientes() {
   const contenedor = document.getElementById("listaPagosPendientes");
@@ -1645,6 +1832,22 @@ async function cargarPagosPendientes() {
       const hoy = new Date();
       const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
       const estaVencido = fechaVenc && fechaVenc < hoy && !pago.completado;
+
+      // Nuevo: Generar HTML para compras a crédito
+      let comprasHTML = '';
+      if (pago.categoria === "Tarjetas de crédito" && pago.datos_credito) {
+        try {
+          const creditoData = JSON.parse(pago.datos_credito);
+          comprasHTML = creditoData.compras.map(compra => `
+            <div class="text-xs mt-1 pl-2 border-l-2 border-gray-200">
+              ${compra.descripcion}: 
+              ${formatoMoneda(compra.valor / compra.cuotas)}/mes (${compra.cuotasRestantes}/${compra.cuotas})
+            </div>
+          `).join('');
+        } catch (e) {
+          console.error("Error al parsear datos_credito:", e);
+        }
+      }
       
       pagoDiv.innerHTML = `
         <div class="flex-1">
@@ -1671,6 +1874,12 @@ async function cargarPagosPendientes() {
               </span>
             ` : ''}
           </div>
+          ${comprasHTML ? `
+            <div class="mt-2">
+              <div class="text-sm font-medium">Detalle de cuotas:</div>
+              ${comprasHTML}
+            </div>
+          ` : ''}
         </div>
         <div class="flex space-x-2 ml-4">
           <button onclick="editarPagoPendiente(${pago.id})" 
