@@ -62,8 +62,103 @@
       max-height: 90%;
       overflow-y: auto;
     }
+    * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Header con botón NotesFlow */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .notesflow-btn {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notesflow-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #FF5252, #26C6DA);
+        }
+
+        .notesflow-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Contenido principal de tu aplicación */
+        .main-content {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .main-content h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+
+        .main-content p {
+            color: #666;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .main-content {
+                padding: 30px 20px;
+            }
+
+            .main-content h1 {
+                font-size: 2rem;
+            }
+        }
+
   </style>
 </head>
+<!--
 <body class="bg-gray-50 text-gray-900 p-4 min-h-screen">
   <main>
   <div class="max-w-6xl mx-auto">
@@ -73,6 +168,15 @@
       </h1>
       <p class="text-gray-600">Administra tus finanzas de manera inteligente</p>
     </header>
+    -->
+<body>
+    <!-- Header con botón NotesFlow -->
+    <div class="header">
+        <div class="logo">🚀 Control de Gastos Personales</div>
+        <button class="notesflow-btn" onclick="openNotesFlow()">
+            📝 NotesFlow
+        </button>
+    </div>
 
     <!-- Botón para cerrar mes y ver meses anteriores -->
     <section class="mb-6 flex justify-between items-center">
@@ -630,7 +734,168 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       // Inicializar gráficos
       inicializarGraficos();
     }
-    
+
+            let notesFlowModal = null;
+
+        function openNotesFlow() {
+            // Si ya hay un modal abierto, no hacer nada
+            if (notesFlowModal && document.body.contains(notesFlowModal)) {
+                return;
+            }
+
+            showNotesFlowModal();
+        }
+
+        function showNotesFlowModal() {
+            // Crear modal con iframe
+            notesFlowModal = document.createElement('div');
+            notesFlowModal.id = 'notesFlowModal';
+            notesFlowModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(5px);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.style.cssText = `
+                position: relative;
+                width: 95%;
+                height: 95%;
+                max-width: 1400px;
+                max-height: 900px;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+            `;
+
+            const iframe = document.createElement('iframe');
+            iframe.src = 'notesflow.html';
+            iframe.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border: none;
+                background: white;
+            `;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '✕';
+            closeBtn.title = 'Cerrar NotesFlow';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: #ff4444;
+                color: white;
+                border: none;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 18px;
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            `;
+
+            closeBtn.addEventListener('mouseenter', () => {
+                closeBtn.style.background = '#ff6666';
+                closeBtn.style.transform = 'scale(1.1)';
+            });
+
+            closeBtn.addEventListener('mouseleave', () => {
+                closeBtn.style.background = '#ff4444';
+                closeBtn.style.transform = 'scale(1)';
+            });
+
+            closeBtn.onclick = closeNotesFlowModal;
+
+            // Cerrar con ESC
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    closeNotesFlowModal();
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+
+            // Cerrar al hacer clic fuera del modal (pero no en el iframe)
+            notesFlowModal.onclick = (e) => {
+                if (e.target === notesFlowModal) {
+                    closeNotesFlowModal();
+                }
+            };
+
+            modalContainer.appendChild(iframe);
+            modalContainer.appendChild(closeBtn);
+            notesFlowModal.appendChild(modalContainer);
+            document.body.appendChild(notesFlowModal);
+
+            // Animación de entrada
+            requestAnimationFrame(() => {
+                notesFlowModal.style.opacity = '1';
+                modalContainer.style.transform = 'scale(1)';
+            });
+
+            // Limpiar event listener al cerrar
+            notesFlowModal.cleanup = () => {
+                document.removeEventListener('keydown', handleEscape);
+            };
+        }
+
+        function closeNotesFlowModal() {
+            if (!notesFlowModal || !document.body.contains(notesFlowModal)) return;
+
+            // Animación de salida
+            notesFlowModal.style.opacity = '0';
+            notesFlowModal.firstChild.style.transform = 'scale(0.9)';
+
+            setTimeout(() => {
+                if (notesFlowModal && notesFlowModal.cleanup) {
+                    notesFlowModal.cleanup();
+                }
+                if (document.body.contains(notesFlowModal)) {
+                    document.body.removeChild(notesFlowModal);
+                }
+                notesFlowModal = null;
+            }, 300);
+        }
+
+         /*
+        // Función alternativa para abrir en nueva pestaña (por si la necesitas)
+        function openNotesFlowNewTab() {
+            window.open('notesflow.html', '_blank', 'width=1200,height=800');
+        }
+        */
+
+        // Función alternativa para navegar en la misma ventana (por si la necesitas)
+        /*
+        function openNotesFlowSamePage() {
+            window.location.href = 'notesflow.html';
+        }
+        */
+
+        // Escuchar mensajes del iframe para cerrar el modal
+        window.addEventListener('message', function(event) {
+            if (event.data === 'closeNotesFlow') {
+                closeNotesFlowModal();
+            }
+        });
+
 // Registrar ingreso
 async function registrarIngreso() {
   const banco = document.getElementById("bancoIngreso").value;
