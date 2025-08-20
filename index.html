@@ -172,7 +172,12 @@
 <body>
     <!-- Header con botón NotesFlow -->
     <div class="header">
+      <!--
         <div class="logo">🚀 Control de Gastos Personales</div>
+        -->
+      <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white">
+        <i class="fas fa-wallet mr-2"></i>Control de Gastos Personales
+      </h1>
         <button class="notesflow-btn" onclick="openNotesFlow()">
             📝 NotesFlow
         </button>
@@ -737,6 +742,8 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             let notesFlowModal = null;
 
+          /*
+          // funcion anterior para abrir el programa en una ventana flotante
         function openNotesFlow() {
             // Si ya hay un modal abierto, no hacer nada
             if (notesFlowModal && document.body.contains(notesFlowModal)) {
@@ -745,6 +752,12 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             showNotesFlowModal();
         }
+        */
+
+        // funcion para abrir en una nueva pestaña
+        function openNotesFlow() {
+            window.open('notesflow.html', '_blank');
+              }
 
         function showNotesFlowModal() {
             // Crear modal con iframe
@@ -875,7 +888,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }, 300);
         }
 
-         /*
+        /*
         // Función alternativa para abrir en nueva pestaña (por si la necesitas)
         function openNotesFlowNewTab() {
             window.open('notesflow.html', '_blank', 'width=1200,height=800');
