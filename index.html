@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +9,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     .bank-card {
@@ -159,23 +159,9 @@
 
   </style>
 </head>
-<!--
-<body class="bg-gray-50 text-gray-900 p-4 min-h-screen">
-  <main>
-  <div class="max-w-6xl mx-auto">
-    <header class="mb-8 text-center">
-      <h1 class="text-3xl md:text-4xl font-bold mb-2 text-indigo-700">
-        <i class="fas fa-wallet mr-2"></i>Control de Gastos Personales
-      </h1>
-      <p class="text-gray-600">Administra tus finanzas de manera inteligente</p>
-    </header>
-    -->
 <body>
     <!-- Header con botón NotesFlow -->
     <div class="header">
-      <!--
-        <div class="logo">🚀 Control de Gastos Personales</div>
-        -->
       <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white">
         <i class="fas fa-wallet mr-2"></i>Control de Gastos Personales
       </h1>
@@ -195,18 +181,18 @@
     </section>
 
     <!-- Botón para abrir la sección de Pagos Pendientes -->
-<section class="mb-6 text-right">
-  <button onclick="document.getElementById('seccionPagosPendientes').scrollIntoView({ behavior: 'smooth' })" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
-  <i class="fas fa-clock mr-2"></i>Pagos Pendientes
-</button>
-</section>
+    <section class="mb-6 text-right">
+      <button onclick="document.getElementById('seccionPagosPendientes').scrollIntoView({ behavior: 'smooth' })" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
+      <i class="fas fa-clock mr-2"></i>Pagos Pendientes
+    </button>
+    </section>
 
     <!-- Saldos por Banco -->
     <section class="mb-8">
       <h2 class="text-xl font-semibold mb-4 flex items-center">
         <i class="fas fa-piggy-bank mr-2 text-indigo-500"></i>Saldos por Banco
       </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
         <div class="bank-card bg-white p-4 rounded-lg shadow-md">
           <div class="flex items-center mb-2">
             <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
@@ -216,7 +202,7 @@
           </div>
           <p id="saldoBancoBogota" class="font-bold text-blue-600 text-xl">$0</p>
         </div>
-                
+
         <div class="bank-card bg-white p-4 rounded-lg shadow-md">
           <div class="flex items-center mb-2">
             <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
@@ -226,7 +212,7 @@
           </div>
           <p id="saldoNequi" class="font-bold text-green-600 text-xl">$0</p>
         </div>
-                
+
         <div class="bank-card bg-white p-4 rounded-lg shadow-md">
           <div class="flex items-center mb-2">
             <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
@@ -236,7 +222,7 @@
           </div>
           <p id="saldoDaviplata" class="font-bold text-purple-600 text-xl">$0</p>
         </div>
-                
+
         <div class="bank-card bg-white p-4 rounded-lg shadow-md">
           <div class="flex items-center mb-2">
             <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
@@ -246,7 +232,7 @@
           </div>
           <p id="saldoColpatria" class="font-bold text-red-600 text-xl">$0</p>
         </div>
-                
+
         <div class="bank-card bg-white p-4 rounded-lg shadow-md">
           <div class="flex items-center mb-2">
             <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
@@ -256,7 +242,7 @@
           </div>
           <p id="saldoBolsillo" class="font-bold text-yellow-600 text-xl">$0</p>
         </div>
-                
+
         <div class="bank-card bg-white p-4 rounded-lg shadow-md">
           <div class="flex items-center mb-2">
             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
@@ -265,6 +251,17 @@
             <h3 class="font-semibold">Efectivo</h3>
           </div>
           <p id="saldoEfectivo" class="font-bold text-gray-600 text-xl">$0</p>
+        </div>
+
+        <!-- Nuevo banco Préstamos -->
+        <div class="bank-card bg-white p-4 rounded-lg shadow-md">
+          <div class="flex items-center mb-2">
+            <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center mr-2">
+              <i class="fas fa-handshake text-orange-500"></i>
+            </div>
+            <h3 class="font-semibold">Préstamos</h3>
+          </div>
+          <p id="saldoPrestamos" class="font-bold text-orange-600 text-xl">$0</p>
         </div>
       </div>
     </section>
@@ -279,7 +276,7 @@
           <canvas id="distributionChart"></canvas>
         </div>
       </div>
-            
+
       <div class="bg-white p-4 rounded-lg shadow-md">
         <h2 class="text-xl font-semibold mb-4 flex items-center">
           <i class="fas fa-chart-bar mr-2 text-indigo-500"></i>Movimientos Mensuales
@@ -302,7 +299,7 @@
           </div>
           <p id="ingresosTotales" class="text-green-600 font-bold text-xl">$0</p>
         </div>
-                
+
         <div class="bg-white p-4 rounded-lg shadow-md text-center">
           <div class="flex items-center justify-center mb-2">
             <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
@@ -312,7 +309,7 @@
           </div>
           <p id="gastosTotales" class="text-red-600 font-bold text-xl">$0</p>
         </div>
-                
+
         <div class="bg-white p-4 rounded-lg shadow-md text-center">
           <div class="flex items-center justify-center mb-2">
             <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
@@ -325,13 +322,14 @@
       </div>
     </section>
 
-   <!-- Registrar Movimiento -->
+  <!-- Registrar Movimiento - CORREGIDO -->
 <section class="bg-white p-6 rounded-lg shadow-md">
   <h2 class="text-xl font-semibold mb-4 flex items-center">
     <i class="fas fa-plus-circle mr-2 text-indigo-500"></i>Registrar Movimiento
   </h2>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
     <!-- Agregar Ingreso -->
     <div class="border border-green-200 rounded-lg p-4 bg-green-50">
       <h3 class="font-semibold text-green-700 mb-3 flex items-center">
@@ -339,8 +337,11 @@
       </h3>
       <div class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
-          <select id="bancoIngreso" class="border p-2 rounded w-full"></select>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Banco donde recibiste el dinero</label>
+          <select id="bancoIngreso" class="border p-2 rounded w-full">
+            <option value="">-- Selecciona el banco --</option>
+            <!-- Las opciones se llenan dinámicamente -->
+          </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
@@ -379,7 +380,9 @@
       <div class="space-y-3">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Banco Origen</label>
-          <select id="bancoGasto" class="border p-2 rounded w-full"></select>
+          <select id="bancoGasto" class="border p-2 rounded w-full">
+            <!-- Las opciones se llenan dinámicamente -->
+          </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
@@ -420,33 +423,77 @@
         </button>
       </div>
     </div>
-        <!-- Transferencia -->
-        <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
-          <h3 class="font-semibold text-blue-700 mb-3 flex items-center">
-            <i class="fas fa-exchange-alt mr-2"></i>Transferencia
-          </h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
-              <select id="desdeBanco" class="border p-2 rounded w-full"></select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Hacia</label>
-              <select id="haciaBanco" class="border p-2 rounded w-full"></select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-                <input type="number" id="valorTransferencia" placeholder="0" class="pl-8 border p-2 rounded w-full" />
-              </div>
-            </div>
-            <button onclick="transferir()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center justify-center">
-              <i class="fas fa-exchange-alt mr-2"></i>Realizar Transferencia
-            </button>
+
+    <!-- Transferencia -->
+    <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+      <h3 class="font-semibold text-blue-700 mb-3 flex items-center">
+        <i class="fas fa-exchange-alt mr-2"></i>Transferencia
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+          <select id="desdeBanco" class="border p-2 rounded w-full">
+            <!-- Las opciones se llenan dinámicamente -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Hacia</label>
+          <select id="haciaBanco" class="border p-2 rounded w-full">
+            <!-- Las opciones se llenan dinámicamente -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input type="number" id="valorTransferencia" placeholder="0" class="pl-8 border p-2 rounded w-full" />
           </div>
         </div>
-    </section>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <input type="text" id="descripcionTransferencia" placeholder="Ej: Transferencia personal" class="border p-2 rounded w-full" />
+        </div>
+        <button onclick="transferir()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center justify-center">
+          <i class="fas fa-exchange-alt mr-2"></i>Realizar Transferencia
+        </button>
+      </div>
+    </div>
+
+    <!-- Préstamo Familiar -->
+    <div class="border border-orange-200 rounded-lg p-4 bg-orange-50">
+      <h3 class="font-semibold text-orange-700 mb-3 flex items-center">
+        <i class="fas fa-handshake mr-2"></i>Préstamo Familiar
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Banco Origen</label>
+          <select id="bancoOrigenPrestamo" class="border p-2 rounded w-full">
+            <!-- Las opciones se llenan dinámicamente -->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+            <input type="number" id="valorPrestamo" placeholder="0" class="pl-8 border p-2 rounded w-full" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Persona</label>
+          <input type="text" id="personaPrestamo" placeholder="Ej: Juan Pérez" class="border p-2 rounded w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <input type="text" id="descripcionPrestamo" placeholder="Ej: Préstamo para gastos médicos" class="border p-2 rounded w-full" />
+        </div>
+        <button onclick="registrarPrestamo()" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded flex items-center justify-center">
+          <i class="fas fa-handshake mr-2"></i>Registrar Préstamo
+        </button>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 <!-- Filtro por banco, tipo y categoría -->
 <section class="mt-6 mb-8 bg-white p-4 rounded-lg shadow-md">
@@ -506,7 +553,7 @@
     Total filtrado: $0
   </div>
 </section>
-  
+
     <!-- Historial -->
     <section class="mb-8 bg-white p-4 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
@@ -520,10 +567,20 @@
       <div id="historial" class="space-y-2 max-h-96 overflow-y-auto pr-2">
         <!-- Movimientos se agregarán aquí -->
       </div>
-    </div>
+    </section>
+
+<!-- Nueva sección: Préstamos Familiares Activos -->
+<section class="mb-8 bg-white p-4 rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold flex items-center text-orange-700">
+      <i class="fas fa-handshake mr-2"></i>Préstamos Familiares Activos
+      <span id="totalPrestado" class="ml-4 text-orange-900 font-bold">$0</span>
+    </h2>
   </div>
- </section>
-</div>
+  <div id="listaPrestamos" class="space-y-3">
+    <p class="text-gray-500">Cargando préstamos activos...</p>
+  </div>
+</section>
 
 <!-- Sección de Pagos Pendientes - Modificada -->
 <section id="seccionPagosPendientes" class="mt-10 bg-white border border-gray-200 p-6 rounded-lg shadow-md">
@@ -552,13 +609,13 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-    
+
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
         <input type="text" id="pagoDescripcion" placeholder="Ej: Servicio de energía" class="border p-2 rounded w-full">
       </div>
-      
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
         <div class="relative">
@@ -566,7 +623,7 @@
           <input type="number" id="pagoValor" placeholder="0" class="pl-8 border p-2 rounded w-full">
         </div>
       </div>
-      
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
         <select id="pagoCategoria" class="border p-2 rounded w-full">
@@ -581,27 +638,27 @@
           <option value="Otros">Otros</option>
         </select>
       </div>
-      
+
       <div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
-  <select id="pagoBanco" class="border p-2 rounded w-full">
-    <option value="" selected>-- Elegir al realizar el pago (opcional) --</option>
-    <!-- Las opciones de bancos se llenarán dinámicamente -->
-  </select>
-</div>
-      
+        <label class="block text-sm font-medium text-gray-700 mb-1">Banco Destino</label>
+        <select id="pagoBanco" class="border p-2 rounded w-full">
+          <option value="" selected>-- Elegir al realizar el pago (opcional) --</option>
+          <!-- Las opciones de bancos se llenarán dinámicamente -->
+        </select>
+      </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento</label>
         <input type="date" id="pagoFechaVencimiento" class="border p-2 rounded w-full">
       </div>
-      
+
       <button onclick="agregarPagoPendiente()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center justify-center">
         <i class="fas fa-save mr-2"></i>Guardar Pago Pendiente
       </button>
     </div>
   </div>
 </div>
-    
+
   <!-- Modal para ver meses anteriores -->
   <div id="modalMesesAnteriores" class="modal">
     <div class="modal-content">
@@ -640,7 +697,7 @@
           </div>
           <p id="detalleIngresos" class="text-green-600 font-bold text-xl">$0</p>
         </div>
-                
+
         <div class="bg-white p-4 rounded-lg shadow-md text-center">
           <div class="flex items-center justify-center mb-2">
             <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mr-2">
@@ -650,11 +707,11 @@
           </div>
           <p id="detalleGastos" class="text-red-600 font-bold text-xl">$0</p>
         </div>
-                
+
         <div class="bg-white p-4 rounded-lg shadow-md text-center">
           <div class="flex items-center justify-center mb-2">
             <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-              <i class="fas fa-balance-scale text-blue-500"></i
+              <i class="fas fa-balance-scale text-blue-500"></i>
             </div>
             <h3 class="font-semibold">Balance Total</h3>
           </div>
@@ -664,33 +721,33 @@
       <div class="bg-white p-4 rounded-lg shadow-md mb-4">
         <h3 class="font-semibold mb-2">Saldos Finales</h3>
         <div id="detalleSaldos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          
           <!-- Saldos por banco se agregarán aquí -->
         </div>
       </div>
       <div class="bg-white p-4 rounded-lg shadow-md">
         <h3 class="font-semibold mb-2">Movimientos</h3>
         <div id="detalleMovimientos" class="space-y-2 max-h-96 overflow-y-auto pr-2">
-          
           <!-- Movimientos se agregarán aquí -->
         </div>
       </div>
     </div>
   </div>
-    
+
   <script>
         // Conectar a Supabase
 const SUPABASE_URL = 'https://kefmaroetfwunrvytujw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZm1hcm9ldGZ3dW5ydnl0dWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUxNjYxMjQsImV4cCI6MjA2MDc0MjEyNH0.Y9-I35dDjMHznaVkzlA-ujNS33q2YQlCsD5n79K6tt8';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     // Datos iniciales
     let bancos = {
       "Banco de Bogotá": 0,
       "Nequi": 0,
       "Daviplata": 0,
       "Colpatria": 0,
-      "Bolsillo Otros Ingresos": 0,
-      "Efectivo": 0
+      "Bolsillo": 0,
+      "Efectivo": 0,
+      "Préstamos": 0
     };
 
     let movimientos = {
@@ -698,8 +755,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       "Nequi": [],
       "Daviplata": [],
       "Colpatria": [],
-      "Bolsillo Otros Ingresos": [],
-      "Efectivo": []
+      "Bolsillo": [],
+      "Efectivo": [],
+      "Préstamos": []
     };
 
     // Almacenamiento de meses cerrados
@@ -714,26 +772,41 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 
     // Inicializar selects de bancos
-    function actualizarFiltroBanco() {
+function actualizarFiltroBanco() {
       const selectFiltro = document.getElementById("filtroBanco");
-      selectFiltro.innerHTML = '<option value="">-- Todos los Bancos --</option>';
-            
-      for (const banco in bancos) {
-        const option = document.createElement("option");
-        option.value = banco;
-        option.textContent = banco;
-        selectFiltro.appendChild(option);
+      if (selectFiltro) {
+        selectFiltro.innerHTML = '<option value="">-- Todos los Bancos --</option>';
+
+        for (const banco in bancos) {
+          const option = document.createElement("option");
+          option.value = banco;
+          option.textContent = banco;
+          selectFiltro.appendChild(option);
+        }
       }
 
-      const selects = ["bancoIngreso", "bancoGasto", "desdeBanco", "haciaBanco"];
+      // Incluir el nuevo bancoIngreso
+      const selects = ["bancoIngreso", "bancoGasto", "desdeBanco", "haciaBanco", "bancoOrigenPrestamo"];
       for (const id of selects) {
         const sel = document.getElementById(id);
-        sel.innerHTML = '';
-        for (const banco in bancos) {
-          const opt = document.createElement("option");
-          opt.value = banco;
-          opt.textContent = banco;
-          sel.appendChild(opt);
+        if (sel) {
+          sel.innerHTML = '';
+          // Para bancoIngreso, incluir opción por defecto
+          if (id === "bancoIngreso") {
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "-- Selecciona el banco --";
+            sel.appendChild(defaultOption);
+          }
+
+          for (const banco in bancos) {
+            if (banco !== "Préstamos") { // No permitir préstamos como origen/destino de transferencias normales
+              const opt = document.createElement("option");
+              opt.value = banco;
+              opt.textContent = banco;
+              sel.appendChild(opt);
+            }
+          }
         }
       }
             
@@ -910,6 +983,464 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
         });
 
+// ✅ FUNCIÓN CORREGIDA: Cargar saldo total de préstamos activos
+async function cargarSaldoPrestamos() {
+  console.log("🔄 Cargando saldo de préstamos...");
+
+  const { data, error } = await supabase
+    .from('prestamos_familiares')
+    .select('valor_pendiente, valor')
+    .eq('activo', true);
+
+  if (error) {
+    console.error("❌ Error al cargar saldo de préstamos:", error);
+    bancos["Préstamos"] = 0;
+    return;
+  }
+
+  if (data && data.length > 0) {
+    const totalPrestamos = data.reduce((sum, prestamo) => {
+      const pendiente = prestamo.valor_pendiente || prestamo.valor || 0;
+      console.log(`💰 Préstamo: ${prestamo.valor}, Pendiente: ${pendiente}`);
+      return sum + pendiente;
+    }, 0);
+
+    bancos["Préstamos"] = totalPrestamos;
+    console.log(`✅ Total préstamos cargado: ${formatoMoneda(totalPrestamos)}`);
+  } else {
+    bancos["Préstamos"] = 0;
+    console.log("ℹ️ No hay préstamos activos");
+  }
+}
+
+// ✅ FUNCIÓN CORREGIDA: Registrar préstamo familiar
+async function registrarPrestamo() {
+  const bancoOrigen = document.getElementById("bancoOrigenPrestamo").value;
+  const valor = Number(document.getElementById("valorPrestamo").value);
+  const persona = document.getElementById("personaPrestamo").value;
+  const descripcion = document.getElementById("descripcionPrestamo").value;
+
+  if (!bancoOrigen || !valor || !persona || !descripcion) {
+    mostrarAlerta("Por favor completa todos los campos", "error");
+    return;
+  }
+
+  if (valor > bancos[bancoOrigen]) {
+    mostrarAlerta(`No tienes suficiente saldo en ${bancoOrigen}. Saldo disponible: ${formatoMoneda(bancos[bancoOrigen])}`, "error");
+    return;
+  }
+
+  const fecha = new Date().toISOString();
+
+  try {
+    console.log("💾 Guardando préstamo en base de datos...");
+
+    // 1. Guardar préstamo en tabla prestamos_familiares
+    const { error: prestamoError } = await supabase.from('prestamos_familiares').insert([
+      {
+        persona: persona,
+        valor: valor,
+        valor_pendiente: valor,
+        descripcion: descripcion,
+        banco_origen: bancoOrigen,
+        fecha_prestamo: fecha,
+        activo: true
+      }
+    ]);
+
+    if (prestamoError) {
+      console.error("❌ Error al guardar préstamo:", prestamoError);
+      mostrarAlerta("Error al registrar el préstamo", "error");
+      return;
+    }
+
+    // 2. Registrar movimiento de gasto en el banco origen
+    const { error: movimientoError } = await supabase.from('movimientos').insert([
+      {
+        tipo: "gasto",
+        valor: valor,
+        descripcion: `Préstamo a ${persona} - ${descripcion}`,
+        categoria: "Préstamos",
+        banco_destino: bancoOrigen,
+        fecha: fecha
+      }
+    ]);
+
+    if (movimientoError) {
+      console.error("❌ Error al registrar movimiento:", movimientoError);
+      mostrarAlerta("Error al registrar el movimiento del préstamo", "error");
+      return;
+    }
+
+    // 3. Actualizar saldos localmente
+    bancos[bancoOrigen] -= valor;
+    bancos["Préstamos"] += valor;
+
+    // 4. Agregar al historial
+    agregarHistorial(`💰 Préstamo de ${formatoMoneda(valor)} a ${persona} desde ${bancoOrigen}`, bancoOrigen, "gasto", "Préstamos", fecha);
+
+    // 5. Recargar préstamos y actualizar interfaz
+    await cargarPrestamosActivos();
+    actualizarTotales();
+
+    // 6. Limpiar campos
+    document.getElementById("valorPrestamo").value = "";
+    document.getElementById("personaPrestamo").value = "";
+    document.getElementById("descripcionPrestamo").value = "";
+
+    mostrarAlerta(`✅ Préstamo de ${formatoMoneda(valor)} a ${persona} registrado correctamente`, "success");
+
+  } catch (error) {
+    console.error("❌ Error general al registrar préstamo:", error);
+    mostrarAlerta("Error inesperado al registrar el préstamo", "error");
+  }
+}
+
+// ✅ FUNCIÓN CORREGIDA: Cargar préstamos activos desde Supabase
+async function cargarPrestamosActivos() {
+  const contenedor = document.getElementById("listaPrestamos");
+  contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-orange-500'></i> Cargando préstamos activos...</div>";
+
+  try {
+    const { data, error } = await supabase
+      .from("prestamos_familiares")
+      .select("*")
+      .eq("activo", true)
+      .order("fecha_prestamo", { ascending: false });
+
+    if (error) {
+      console.error("❌ Error al cargar préstamos:", error);
+      contenedor.innerHTML = `<div class="text-red-500 text-center py-4"><i class="fas fa-exclamation-circle mr-2"></i>Error al cargar los préstamos</div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">
+        <i class="fas fa-info-circle mr-2"></i>No hay préstamos activos registrados.
+      </div>`;
+      document.getElementById("totalPrestado").textContent = "$0";
+      return;
+    }
+
+    contenedor.innerHTML = "";
+    let totalPrestado = 0;
+
+    // Agrupar por persona
+    const prestamosPorPersona = {};
+    data.forEach(prestamo => {
+      const persona = prestamo.persona || "Sin nombre";
+      if (!prestamosPorPersona[persona]) {
+        prestamosPorPersona[persona] = [];
+      }
+      prestamosPorPersona[persona].push(prestamo);
+      totalPrestado += prestamo.valor_pendiente || prestamo.valor;
+    });
+
+    // Mostrar por personas
+    for (const persona in prestamosPorPersona) {
+      const personaDiv = document.createElement("div");
+      personaDiv.className = "mb-6 border-l-4 border-orange-400 bg-orange-50 rounded-lg";
+
+      const prestamosPersona = prestamosPorPersona[persona];
+      const totalPersona = prestamosPersona.reduce((sum, p) => sum + (p.valor_pendiente || p.valor), 0);
+
+      const personaTitle = document.createElement("div");
+      personaTitle.className = "bg-orange-100 px-4 py-3 rounded-t-lg";
+      personaTitle.innerHTML = `
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg text-orange-800">
+            <i class="fas fa-user mr-2"></i>${persona}
+          </h3>
+          <span class="font-bold text-orange-900">${formatoMoneda(totalPersona)}</span>
+        </div>
+      `;
+      personaDiv.appendChild(personaTitle);
+
+      const prestamosContainer = document.createElement("div");
+      prestamosContainer.className = "p-4 space-y-3";
+
+      prestamosPersona.forEach(prestamo => {
+        const prestamoDiv = document.createElement("div");
+        prestamoDiv.className = "bg-white border border-orange-200 p-3 rounded-lg shadow-sm";
+
+        const fechaPrestamo = new Date(prestamo.fecha_prestamo).toLocaleDateString("es-CO", {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        });
+
+        const valorPendiente = prestamo.valor_pendiente || prestamo.valor;
+        const valorOriginal = prestamo.valor;
+        const porcentajePagado = valorOriginal > 0 ? ((valorOriginal - valorPendiente) / valorOriginal * 100).toFixed(1) : 0;
+
+        prestamoDiv.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex-1">
+              <div class="flex items-center mb-1">
+                <span class="font-medium">Préstamo: ${formatoMoneda(valorOriginal)}</span>
+                ${valorPendiente < valorOriginal ? `<span class="ml-2 text-sm text-green-600">(${porcentajePagado}% pagado)</span>` : ''}
+              </div>
+              <div class="text-sm text-gray-600">
+                <span><i class="fas fa-calendar mr-1"></i>Prestado el ${fechaPrestamo}</span>
+                <span class="ml-3"><i class="fas fa-university mr-1"></i>${prestamo.banco_origen}</span>
+              </div>
+              <div class="text-sm text-gray-500 mt-1">
+                ${prestamo.descripcion}
+              </div>
+              <div class="text-sm font-semibold ${valorPendiente > 0 ? 'text-orange-600' : 'text-green-600'} mt-1">
+                Pendiente: ${formatoMoneda(valorPendiente)}
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button onclick="registrarAbonoPrestamo(${prestamo.id}, ${valorPendiente}, '${persona.replace(/'/g, "\\'")}', ${valorOriginal})"
+              class="text-green-500 hover:text-green-700 p-1 text-sm" title="Registrar abono">
+              <i class="fas fa-money-bill-wave mr-1"></i>Abono
+            </button>
+            <button onclick="marcarPrestamoComoPagado(${prestamo.id}, '${persona.replace(/'/g, "\\'")}', ${valorPendiente})"
+              class="text-blue-500 hover:text-blue-700 p-1 text-sm" title="Marcar como totalmente pagado">
+              <i class="fas fa-check-circle mr-1"></i>Pagado
+            </button>
+            <button onclick="eliminarPrestamo(${prestamo.id})"
+              class="text-red-500 hover:text-red-700 p-1 text-sm" title="Eliminar préstamo">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        `;
+
+        prestamosContainer.appendChild(prestamoDiv);
+      });
+
+      personaDiv.appendChild(prestamosContainer);
+      contenedor.appendChild(personaDiv);
+    }
+
+    document.getElementById("totalPrestado").textContent = formatoMoneda(totalPrestado);
+
+  } catch (error) {
+    console.error("❌ Error al cargar préstamos activos:", error);
+    contenedor.innerHTML = `<div class="text-red-500 text-center py-4">Error inesperado al cargar préstamos</div>`;
+  }
+}
+
+// ✅ FUNCIÓN CORREGIDA: Registrar abono a préstamo (ahora incluye banco destino)
+async function registrarAbonoPrestamo(idPrestamo, valorPendiente, persona, valorOriginal) {
+  // Paso 1: Pedir valor del abono
+  const { value: formValues } = await Swal.fire({
+    title: `Abono a préstamo de ${persona}`,
+    html: `
+      <div class="text-left space-y-4">
+        <p class="text-gray-600">Pendiente: <span class="font-bold">${formatoMoneda(valorPendiente)}</span></p>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Valor del abono</label>
+          <input type="number" id="swal-valor" placeholder="0" class="swal2-input" max="${valorPendiente}">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Banco donde recibiste el dinero</label>
+          <select id="swal-banco" class="swal2-input">
+            <option value="">-- Selecciona el banco --</option>
+            ${Object.keys(bancos).filter(b => b !== "Préstamos").map(banco =>
+              `<option value="${banco}">${banco}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Registrar Abono',
+    preConfirm: () => {
+      const valor = parseFloat(document.getElementById('swal-valor').value);
+      const banco = document.getElementById('swal-banco').value;
+
+      if (!valor || valor <= 0) return Swal.showValidationMessage('Ingresa un valor válido');
+      if (valor > valorPendiente) return Swal.showValidationMessage(`El abono no puede ser mayor a ${formatoMoneda(valorPendiente)}`);
+      if (!banco) return Swal.showValidationMessage('Debes seleccionar un banco');
+
+      return { valor, banco };
+    }
+  });
+
+  if (!formValues) return;
+
+  const { valor, banco } = formValues;
+  const nuevoValorPendiente = valorPendiente - valor;
+  const fechaAbono = new Date().toISOString();
+
+  try {
+    console.log(`💰 Registrando abono: ${valor} de ${persona} en ${banco}`);
+
+    // 1. Actualizar préstamo en base de datos
+    const { error: updateError } = await supabase
+      .from('prestamos_familiares')
+      .update({
+        valor_pendiente: nuevoValorPendiente,
+        activo: nuevoValorPendiente > 0,
+        fecha_ultimo_abono: fechaAbono
+      })
+      .eq('id', idPrestamo);
+
+    if (updateError) {
+      console.error("❌ Error al actualizar préstamo:", updateError);
+      mostrarAlerta("Error al registrar el abono", "error");
+      return;
+    }
+
+    // 2. Registrar ingreso por el abono en el banco seleccionado
+    const { error: ingresoError } = await supabase.from('movimientos').insert([
+      {
+        tipo: "ingreso",
+        valor: valor,
+        descripcion: `Abono préstamo de ${persona} (${formatoMoneda(nuevoValorPendiente)} pendiente)`,
+        categoria: "Reembolso préstamos",
+        banco_destino: banco,
+        fecha: fechaAbono
+      }
+    ]);
+
+    if (ingresoError) {
+      console.error("❌ Error al registrar ingreso:", ingresoError);
+      mostrarAlerta("Error al registrar el ingreso del abono", "error");
+      return;
+    }
+
+    // 3. Actualizar saldos locales
+    bancos["Préstamos"] -= valor; // Reducir saldo de préstamos
+    bancos[banco] += valor;       // Aumentar saldo del banco destino
+
+    // 4. Agregar al historial
+    agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco} - Abono préstamo de ${persona}`, banco, "ingreso", "Reembolso préstamos", fechaAbono);
+
+    // 5. Recargar préstamos y actualizar interfaz
+    await cargarPrestamosActivos();
+    actualizarTotales();
+
+    const mensaje = nuevoValorPendiente > 0
+      ? `✅ Abono de ${formatoMoneda(valor)} registrado en ${banco}. Pendiente: ${formatoMoneda(nuevoValorPendiente)}`
+      : `🎉 ¡Préstamo completamente pagado! Ingreso de ${formatoMoneda(valor)} registrado en ${banco}`;
+
+    mostrarAlerta(mensaje, "success");
+
+  } catch (error) {
+    console.error("❌ Error al procesar abono:", error);
+    mostrarAlerta("Error inesperado al registrar el abono", "error");
+  }
+}
+
+// Marcar préstamo como totalmente pagado
+async function marcarPrestamoComoPagado(idPrestamo, persona, valorPendiente) {
+  if (valorPendiente <= 0) {
+    mostrarAlerta("Este préstamo ya está completamente pagado", "info");
+    return;
+  }
+
+  const confirmar = await Swal.fire({
+    title: '¿Marcar como pagado?',
+    text: `¿Confirmas que ${persona} pagó completamente los ${formatoMoneda(valorPendiente)} restantes?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, marcar como pagado',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => {
+      const banco = document.getElementById('swal-banco-pago').value;
+      if (!banco) {
+        Swal.showValidationMessage('Debes seleccionar un banco');
+        return false;
+      }
+      return banco;
+    }
+  });
+
+  if (!bancoDestino) return;
+
+  const fechaPago = new Date().toISOString();
+
+  try {
+    console.log(`💰 Marcando préstamo como pagado: ${valorPendiente} de ${persona} en ${bancoDestino}`);
+
+    // 1. Actualizar préstamo como pagado
+    const { error: updateError } = await supabase
+      .from('prestamos_familiares')
+      .update({
+        valor_pendiente: 0,
+        activo: false,
+        fecha_ultimo_abono: fechaPago
+      })
+      .eq('id', idPrestamo);
+
+    if (updateError) {
+      console.error("❌ Error al marcar préstamo como pagado:", updateError);
+      mostrarAlerta("Error al actualizar el préstamo", "error");
+      return;
+    }
+
+    // 2. Registrar ingreso por el pago completo
+    const { error: ingresoError } = await supabase.from('movimientos').insert([
+      {
+        tipo: "ingreso",
+        valor: valorPendiente,
+        descripcion: `Pago completo préstamo de ${persona}`,
+        categoria: "Reembolso préstamos",
+        banco_destino: bancoDestino,
+        fecha: fechaPago
+      }
+    ]);
+
+    if (ingresoError) {
+      console.error("❌ Error al registrar ingreso:", ingresoError);
+      mostrarAlerta("Error al registrar el ingreso del pago", "error");
+      return;
+    }
+
+    // 3. Actualizar saldos locales
+    bancos["Préstamos"] -= valorPendiente;
+    bancos[bancoDestino] += valorPendiente;
+
+    // 4. Agregar al historial
+    agregarHistorial(`+ ${formatoMoneda(valorPendiente)} en ${bancoDestino} - Pago completo préstamo de ${persona}`, bancoDestino, "ingreso", "Reembolso préstamos", fechaPago);
+
+    // 5. Recargar y actualizar
+    await cargarPrestamosActivos();
+    actualizarTotales();
+
+    mostrarAlerta(`Préstamo de ${persona} marcado como completamente pagado. Ingreso de ${formatoMoneda(valorPendiente)} registrado en ${bancoDestino}`, "success");
+
+  } catch (error) {
+    console.error("❌ Error al procesar pago completo:", error);
+    mostrarAlerta("Error inesperado al procesar el pago", "error");
+  }
+}
+
+// Eliminar préstamo
+async function eliminarPrestamo(idPrestamo) {
+  const confirmar = await Swal.fire({
+    title: '¿Eliminar préstamo?',
+    text: 'Esta acción no se puede deshacer. El préstamo se eliminará permanentemente.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33'
+  });
+
+  if (!confirmar.isConfirmed) return;
+
+  const { error } = await supabase
+    .from('prestamos_familiares')
+    .delete()
+    .eq('id', idPrestamo);
+
+  if (error) {
+    console.error("Error al eliminar préstamo:", error);
+    mostrarAlerta("Error al eliminar el préstamo", "error");
+    return;
+  }
+
+  await cargarPrestamosActivos();
+  mostrarAlerta("Préstamo eliminado correctamente", "success");
+}
+
 // Registrar ingreso
 async function registrarIngreso() {
   const banco = document.getElementById("bancoIngreso").value;
@@ -937,7 +1468,7 @@ const { error } = await supabase.from('movimientos').insert([
 
 if (error) {
   console.error("Error al guardar en Supabase:", error);
-  mostrarAlerta("❌ Error al guardar en la base de datos", "error");
+  mostrarAlerta("Error al guardar en la base de datos", "error");
   return;
 }
 
@@ -953,11 +1484,13 @@ actualizarTotales();
   document.getElementById("descripcionIngreso").value = "";
   document.getElementById("categoriaIngreso").value = "";
 
-  mostrarAlerta("✅ Ingreso registrado con éxito", "success");
+  mostrarAlerta("Ingreso registrado con éxito", "success");
 }
-    
-// Leer los movimientos desde Supabase al cargar la página
+
+// ✅ FUNCIÓN CORREGIDA: Leer los movimientos desde Supabase al cargar la página
 async function cargarMovimientosDesdeSupabase() {
+  console.log("🔄 Cargando movimientos desde Supabase...");
+
   const { data, error } = await supabase
     .from('movimientos')
     .select('*')
@@ -975,16 +1508,23 @@ async function cargarMovimientosDesdeSupabase() {
     movimientos[banco] = [];
   }
 
+  // Limpiar historial visual
+  document.getElementById("historial").innerHTML = "";
+
+  // ✅ IMPORTANTE: Cargar préstamos activos PRIMERO
+  await cargarSaldoPrestamos();
+
+  console.log(`📊 Procesando ${data?.length || 0} movimientos...`);
+
   // Procesar cada movimiento
   data.forEach(mov => {
-  const { tipo, valor, descripcion, categoria, fecha, banco_origen, banco_destino } = mov;
+    const { tipo, valor, descripcion, categoria, fecha, banco_origen, banco_destino } = mov;
 
     if (tipo === "ingreso") {
       bancos[banco_destino] += valor;
       movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
       agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
     }
-
     else if (tipo === "transferencia") {
       bancos[banco_origen] -= valor;
       bancos[banco_destino] += valor;
@@ -992,24 +1532,23 @@ async function cargarMovimientosDesdeSupabase() {
       movimientos[banco_origen].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_origen });
       movimientos[banco_destino].push({ tipo, valor, desc: descripcion, categoria, fecha, banco: banco_destino });
 
-      agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
+      agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${banco_origen} a ${banco_destino}`, banco_origen, tipo, categoria, fecha);
     }
-
     else if (tipo === "gasto") {
-  bancos[banco_destino] -= valor;
-  movimientos[banco_destino].push({
-    tipo,
-    valor,
-    desc: descripcion,
-    categoria,
-    fecha,
-    banco: banco_destino
+      bancos[banco_destino] -= valor;
+      movimientos[banco_destino].push({
+        tipo,
+        valor,
+        desc: descripcion,
+        categoria,
+        fecha,
+        banco: banco_destino
+      });
+      agregarHistorial(`- ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
+    }
   });
-  agregarHistorial(`+ ${formatoMoneda(valor)} en ${banco_destino} - ${descripcion}`, banco_destino, tipo, categoria, fecha);
-}
 
-  });
-
+  console.log("✅ Movimientos cargados correctamente");
   actualizarTotales();
 }
 
@@ -1044,8 +1583,8 @@ async function registrarGasto() {
   ]);
 
   if (error) {
-    console.error("❌ Error al guardar el gasto:", error);
-    mostrarAlerta("❌ Error al guardar el gasto en la base de datos", "error");
+    console.error("Error al guardar el gasto:", error);
+    mostrarAlerta("Error al guardar el gasto en la base de datos", "error");
     return;
   }
 
@@ -1061,14 +1600,15 @@ async function registrarGasto() {
   document.getElementById("descripcionGasto").value = "";
   document.getElementById("categoriaGasto").value = "";
 
-  mostrarAlerta("✅ Gasto registrado con éxito", "success");
+  mostrarAlerta("Gasto registrado con éxito", "success");
 }
 
-// Transferir entre cuentas
+// Transferir entre cuentas - Modificada para incluir descripción
 async function transferir() {
   const desde = document.getElementById("desdeBanco").value;
   const hacia = document.getElementById("haciaBanco").value;
   const valor = Number(document.getElementById("valorTransferencia").value);
+  const descripcion = document.getElementById("descripcionTransferencia").value || `Transferencia de ${desde} a ${hacia}`;
 
   if (!desde || !hacia || desde === hacia || !valor) {
     mostrarAlerta("Por favor completa todos los campos correctamente", "error");
@@ -1080,8 +1620,7 @@ async function transferir() {
     return;
   }
 
-  const descripcion = `Transferencia de ${desde} a ${hacia}`;
-  const fecha = new Date().toISOString();  // ⬅️ UTC
+  const fecha = new Date().toISOString();
 
   // Guardar en Supabase
   const { error } = await supabase.from('movimientos').insert([
@@ -1096,8 +1635,8 @@ async function transferir() {
   ]);
 
   if (error) {
-    console.error("❌ Error al guardar transferencia:", error);
-    mostrarAlerta("❌ No se pudo guardar la transferencia", "error");
+    console.error("Error al guardar transferencia:", error);
+    mostrarAlerta("No se pudo guardar la transferencia", "error");
     return;
   }
 
@@ -1108,11 +1647,12 @@ async function transferir() {
   movimientos[desde].push({ tipo: "transferencia", valor, desc: `Transferencia a ${hacia}`, fecha, banco: desde });
   movimientos[hacia].push({ tipo: "transferencia", valor, desc: `Transferencia de ${desde}`, fecha, banco: hacia });
 
-  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia}`, desde, "transferencia", "", fecha);
+  agregarHistorial(`⇄ ${formatoMoneda(valor)} de ${desde} a ${hacia} - ${descripcion}`, desde, "transferencia", "", fecha);
   actualizarTotales();
 
   document.getElementById("valorTransferencia").value = "";
-  mostrarAlerta("✅ Transferencia realizada con éxito", "success");
+  document.getElementById("descripcionTransferencia").value = "";
+  mostrarAlerta("Transferencia realizada con éxito", "success");
 }
 
 function agregarHistorial(texto, banco, tipo, categoria = "", fecha = null) {
@@ -1182,6 +1722,7 @@ function aplicarFiltros() {
 
   document.getElementById("totalFiltrado").textContent = `Total filtrado: ${formatoMoneda(total)}`;
 }
+
     // Actualizar totales y gráficos
     function actualizarTotales() {
       let ingresos = 0, gastos = 0;
@@ -1202,9 +1743,10 @@ function aplicarFiltros() {
       document.getElementById("saldoNequi").textContent = formatoMoneda(bancos["Nequi"]);
       document.getElementById("saldoDaviplata").textContent = formatoMoneda(bancos["Daviplata"]);
       document.getElementById("saldoColpatria").textContent = formatoMoneda(bancos["Colpatria"]);
-      document.getElementById("saldoBolsillo").textContent = formatoMoneda(bancos["Bolsillo Otros Ingresos"]);
+      document.getElementById("saldoBolsillo").textContent = formatoMoneda(bancos["Bolsillo"]);
       document.getElementById("saldoEfectivo").textContent = formatoMoneda(bancos["Efectivo"]);
-            
+      document.getElementById("saldoPrestamos").textContent = formatoMoneda(bancos["Préstamos"]);
+
       // Actualizar gráficos
       actualizarGraficos();
     }
@@ -1213,7 +1755,7 @@ function aplicarFiltros() {
     function inicializarGraficos() {
       const ctxDistribution = document.getElementById('distributionChart').getContext('2d');
       const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
-            
+
       // Colores para los gráficos
       const colors = [
         '#3B82F6', // Azul
@@ -1221,9 +1763,10 @@ function aplicarFiltros() {
         '#8B5CF6', // Violeta
         '#EF4444', // Rojo
         '#F59E0B', // Amarillo
-        '#64748B'  // Gris
+        '#64748B', // Gris
+        '#F97316'  // Naranja para préstamos
       ];
-            
+
       distributionChart = new Chart(ctxDistribution, {
         type: 'doughnut',
         data: {
@@ -1251,7 +1794,7 @@ function aplicarFiltros() {
           }
         }
       });
-            
+
       monthlyChart = new Chart(ctxMonthly, {
         type: 'bar',
         data: {
@@ -1297,7 +1840,7 @@ function aplicarFiltros() {
         }
       });
     }
-        
+
     // Actualizar gráficos
     function actualizarGraficos() {
       if (distributionChart) {
@@ -1305,21 +1848,21 @@ function aplicarFiltros() {
         distributionChart.update();
       }
     }
-        
+
     // Mostrar alerta personalizada
     function mostrarAlerta(mensaje, tipo) {
       const alerta = document.createElement('div');
       alerta.className = `fixed top-4 right-4 p-4 rounded shadow-lg text-white max-w-xs z-50 transform transition-all duration-300 ${
-        tipo === 'error' ? 'bg-red-500' : 
-        tipo === 'success' ? 'bg-green-500' : 
+        tipo === 'error' ? 'bg-red-500' :
+        tipo === 'success' ? 'bg-green-500' :
         'bg-yellow-500'
       }`;
-            
+
       alerta.innerHTML = `
         <div class="flex items-start">
           <i class="fas ${
-            tipo === 'error' ? 'fa-exclamation-circle' : 
-            tipo === 'success' ? 'fa-check-circle' : 
+            tipo === 'error' ? 'fa-exclamation-circle' :
+            tipo === 'success' ? 'fa-check-circle' :
             'fa-exclamation-triangle'
           } mr-2 mt-1"></i>
           <div>
@@ -1331,14 +1874,14 @@ function aplicarFiltros() {
           </button>
         </div>
       `;
-            
+
       document.body.appendChild(alerta);
-            
+
       setTimeout(() => {
         alerta.remove();
       }, 5000);
     }
-        
+
     // Eliminar movimiento
     function eliminarMovimiento(elemento) {
       if (confirm("¿Estás seguro de eliminar este movimiento?")) {
@@ -1347,7 +1890,7 @@ function aplicarFiltros() {
         mostrarAlerta("Movimiento eliminado", "success");
       }
     }
-        
+
     // Exportar historial
     function exportarHistorialCSV() {
   let csv = "Tipo,Banco,Valor,Descripción,Categoría,Fecha\n";
@@ -1375,7 +1918,7 @@ function aplicarFiltros() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-            
+
       mostrarAlerta("Historial exportado como CSV", "success");
     }
 
@@ -1423,8 +1966,8 @@ async function cerrarMes() {
     ]);
 
     if (error) {
-      console.error("❌ Error al guardar en historial_mensual:", error);
-      mostrarAlerta("❌ No se pudo guardar el mes cerrado", "error");
+      console.error("Error al guardar en historial_mensual:", error);
+      mostrarAlerta("No se pudo guardar el mes cerrado", "error");
       return;
     }
 
@@ -1432,22 +1975,27 @@ async function cerrarMes() {
     const { error: deleteError } = await supabase.from("movimientos").delete().neq("id", 0); // Borra todo
 
     if (deleteError) {
-      console.error("❌ Error al limpiar tabla movimientos:", deleteError);
+      console.error("Error al limpiar tabla movimientos:", deleteError);
     }
 
-    // Reiniciar estado
+    // Reiniciar estado (pero mantener préstamos)
     for (const banco in bancos) {
-      bancos[banco] = 0;
-      movimientos[banco] = [];
+      if (banco !== "Préstamos") {
+        bancos[banco] = 0;
+        movimientos[banco] = [];
+      }
     }
 
     document.getElementById("historial").innerHTML = "";
     actualizarTotales();
+    await reiniciarPagosPendientes();
+    await cargarPagosPendientes();
     mostrarAlerta(`Mes ${nombreMes} cerrado correctamente.`, "success");
   }
 }
-    
+
    // Mostrar modal con meses anteriores desde Supabase
+// Funciones para pagos pendientes (mantenidas del código original)
 async function mostrarModalMesesAnteriores() {
   const listaMeses = document.getElementById("listaMeses");
   listaMeses.innerHTML = "";
@@ -1458,7 +2006,7 @@ async function mostrarModalMesesAnteriores() {
     .order("fecha_cierre", { ascending: false });
 
   if (error) {
-    console.error("❌ Error al cargar historial mensual:", error);
+    console.error("Error al cargar historial mensual:", error);
     listaMeses.innerHTML = '<p class="text-red-500 text-center py-4">Error al cargar datos</p>';
     return;
   }
@@ -1472,19 +2020,17 @@ async function mostrarModalMesesAnteriores() {
     const item = document.createElement("div");
     item.className = "bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-50";
     item.onclick = () => {
-  // Asegurarse de que mes.movimientos sea un objeto
-  if (typeof mes.movimientos === "string") {
-    try {
-      mes.movimientos = JSON.parse(mes.movimientos);
-    } catch (e) {
-      console.error("❌ Error al convertir movimientos JSON:", e);
-      mostrarAlerta("❌ No se pudieron leer los movimientos de este mes.", "error");
-      return;
-    }
-  }
-
-  mostrarDetalleMes(mes);
-};
+      if (typeof mes.movimientos === "string") {
+        try {
+          mes.movimientos = JSON.parse(mes.movimientos);
+        } catch (e) {
+          console.error("Error al convertir movimientos JSON:", e);
+          mostrarAlerta("No se pudieron leer los movimientos de este mes.", "error");
+          return;
+        }
+      }
+      mostrarDetalleMes(mes);
+    };
 
     const fechaMostrada = new Date(mes.fecha_cierre).toLocaleString("es-CO");
 
@@ -1504,64 +2050,61 @@ async function mostrarModalMesesAnteriores() {
   document.getElementById("modalMesesAnteriores").style.display = "flex";
 }
 
-    // Mostrar detalle de un mes específico
-    function mostrarDetalleMes(mes) {
-      document.getElementById("tituloDetalleMes").innerHTML = `
-        <i class="fas fa-file-invoice-dollar mr-2 text-indigo-500"></i>
-        ${mes.nombre_mes.charAt(0).toUpperCase() + mes.nombre_mes.slice(1)} ${mes.año}
-      `;
-            
-      // Actualizar totales
-      document.getElementById("detalleIngresos").textContent = formatoMoneda(mes.ingresos);
-      document.getElementById("detalleGastos").textContent = formatoMoneda(mes.gastos);
-      document.getElementById("detalleBalance").textContent = formatoMoneda(mes.balance);
-            
-      // Mostrar saldos por banco
-      const detalleSaldos = document.getElementById("detalleSaldos");
-      detalleSaldos.innerHTML = "";
-            
-      for (const banco in mes.saldos) {
-        const saldoDiv = document.createElement("div");
-        saldoDiv.className = "bg-gray-50 p-2 rounded";
-        saldoDiv.innerHTML = `
-          <p class="text-sm font-medium">${banco}</p>
-          <p class="font-bold">${formatoMoneda(mes.saldos[banco])}</p>
-        `;
-        detalleSaldos.appendChild(saldoDiv);
-      }
-            
-      // Mostrar movimientos
-      const detalleMovimientos = document.getElementById("detalleMovimientos");
-      detalleMovimientos.innerHTML = "";
-            
-// Si los movimientos ya vienen como lista plana
-const todosMovimientos = Array.isArray(mes.movimientos) ? [...mes.movimientos] : [];
+function mostrarDetalleMes(mes) {
+  document.getElementById("tituloDetalleMes").innerHTML = `
+    <i class="fas fa-file-invoice-dollar mr-2 text-indigo-500"></i>
+    ${mes.nombre_mes.charAt(0).toUpperCase() + mes.nombre_mes.slice(1)} ${mes.año}
+  `;
 
-todosMovimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  // Actualizar totales
+  document.getElementById("detalleIngresos").textContent = formatoMoneda(mes.ingresos);
+  document.getElementById("detalleGastos").textContent = formatoMoneda(mes.gastos);
+  document.getElementById("detalleBalance").textContent = formatoMoneda(mes.balance);
 
-for (const mov of todosMovimientos) {
-  const div = document.createElement("div");
-  div.className = `movement-item p-3 rounded ${mov.tipo}`;
+  // Mostrar saldos por banco
+  const detalleSaldos = document.getElementById("detalleSaldos");
+  detalleSaldos.innerHTML = "";
 
-  let texto = "";
-  if (mov.tipo === "ingreso") {
-    texto = `+ ${formatoMoneda(mov.valor)} en ${mov.banco_destino} - ${mov.descripcion}`;
-  } else if (mov.tipo === "gasto") {
-    texto = `- ${formatoMoneda(mov.valor)} en ${mov.banco_destino} - ${mov.descripcion}`;
-  } else {
-    texto = `Transferencia de ${formatoMoneda(mov.valor)} de ${mov.banco_origen} a ${mov.banco_destino}`;
+  for (const banco in mes.saldos) {
+    const saldoDiv = document.createElement("div");
+    saldoDiv.className = "bg-gray-50 p-2 rounded";
+    saldoDiv.innerHTML = `
+      <p class="text-sm font-medium">${banco}</p>
+      <p class="font-bold">${formatoMoneda(mes.saldos[banco])}</p>
+    `;
+    detalleSaldos.appendChild(saldoDiv);
   }
 
-  const fechaMostrada = new Date(mov.fecha).toLocaleString("es-CO");
+  // Mostrar movimientos
+  const detalleMovimientos = document.getElementById("detalleMovimientos");
+  detalleMovimientos.innerHTML = "";
 
-  div.innerHTML = `
-    <div class="flex justify-between items-start">
-      <div>
-        <p class="font-medium">${texto}</p>
-        <p class="text-xs text-gray-500">${fechaMostrada}</p>
+  const todosMovimientos = Array.isArray(mes.movimientos) ? [...mes.movimientos] : [];
+  todosMovimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+  for (const mov of todosMovimientos) {
+    const div = document.createElement("div");
+    div.className = `movement-item p-3 rounded ${mov.tipo}`;
+
+    let texto = "";
+    if (mov.tipo === "ingreso") {
+      texto = `+ ${formatoMoneda(mov.valor)} en ${mov.banco_destino} - ${mov.descripcion}`;
+    } else if (mov.tipo === "gasto") {
+      texto = `- ${formatoMoneda(mov.valor)} en ${mov.banco_destino} - ${mov.descripcion}`;
+    } else {
+      texto = `Transferencia de ${formatoMoneda(mov.valor)} de ${mov.banco_origen} a ${mov.banco_destino}`;
+    }
+
+    const fechaMostrada = new Date(mov.fecha).toLocaleString("es-CO");
+
+    div.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="font-medium">${texto}</p>
+          <p class="text-xs text-gray-500">${fechaMostrada}</p>
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
   detalleMovimientos.appendChild(div);
 }
@@ -1584,16 +2127,16 @@ function mostrarModalAgregarPago() {
   // Llenar select de bancos CON OPCIÓN POR DEFECTO
   const selectBanco = document.getElementById("pagoBanco");
   selectBanco.innerHTML = '<option value="" selected>-- Elegir al pagar (opcional) --</option>'; // Nueva línea
-  
+
   for (const banco in bancos) {
     const opt = document.createElement("option");
     opt.value = banco;
     opt.textContent = banco;
     selectBanco.appendChild(opt);
-  } 
+  }
   // Establecer fecha mínima como hoy
   document.getElementById("pagoFechaVencimiento").min = new Date().toISOString().split("T")[0];
-  
+
   document.getElementById("modalAgregarPago").style.display = "flex";
 }
 
@@ -1644,11 +2187,16 @@ async function cargarPagosPendientes() {
   const contenedor = document.getElementById("listaPagosPendientes");
   contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-indigo-500'></i> Cargando pagos pendientes...</div>";
 
-  // Obtener solo pagos pendientes (no completados)
+  // Obtener el primer y último día del mes actual
+  const hoy = new Date();
+  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+  // Cargar todos los pagos (pendientes y completados este mes)
   const { data, error } = await supabase
     .from("pagos_pendientes")
     .select("*")
-    .eq("completado", false)
+    .or(`completado.eq.false,fecha_completado.gte.${primerDiaMes.toISOString()},fecha_completado.is.null`)
     .order("fecha_vencimiento", { ascending: true });
 
   if (error) {
@@ -1658,12 +2206,7 @@ async function cargarPagosPendientes() {
   }
 
   if (!data || data.length === 0) {
-    contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">
-      <i class="fas fa-info-circle mr-2"></i>No hay pagos pendientes para este mes.
-      <br><button onclick="reiniciarPagosPendientes().then(() => cargarPagosPendientes())" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-        <i class="fas fa-refresh mr-2"></i>Cargar pagos del mes anterior
-      </button>
-    </div>`;
+    contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">No hay pagos pendientes registrados.</div>`;
     return;
   }
 
@@ -1672,11 +2215,10 @@ async function cargarPagosPendientes() {
   // Agrupar por categoría
   const pagosPorCategoria = {};
   data.forEach(pago => {
-    const categoria = pago.categoria || "Sin categoría";
-    if (!pagosPorCategoria[categoria]) {
-      pagosPorCategoria[categoria] = [];
+    if (!pagosPorCategoria[pago.categoria || "Sin categoría"]) {
+      pagosPorCategoria[pago.categoria || "Sin categoría"] = [];
     }
-    pagosPorCategoria[categoria].push(pago);
+    pagosPorCategoria[pago.categoria || "Sin categoría"].push(pago);
   });
 
   // Mostrar por categorías
@@ -1694,27 +2236,44 @@ async function cargarPagosPendientes() {
 
     pagosPorCategoria[categoria].forEach(pago => {
       const pagoDiv = document.createElement("div");
-      pagoDiv.className = "border p-3 rounded-lg shadow-sm bg-white";
+      pagoDiv.className = `border p-3 rounded-lg shadow-sm ${pago.completado ? 'bg-green-100' : 'bg-white'}`;
 
       const fechaVencimiento = pago.fecha_vencimiento
         ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
         : "Sin fecha";
 
+      const fechaPago = pago.fecha_completado
+        ? new Date(pago.fecha_completado).toLocaleDateString("es-CO", { day: 'numeric', month: 'short', year: 'numeric' })
+        : "";
+
       const hoy = new Date();
       const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
-      const estaVencido = fechaVenc && fechaVenc < hoy;
+      const estaVencido = fechaVenc && fechaVenc < hoy && !pago.completado;
 
       pagoDiv.innerHTML = `
         <div class="flex-1">
           <div class="flex items-start justify-between">
-            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">${pago.descripcion}</p>
-            <span class="ml-2 font-bold">${formatoMoneda(pago.valor)}</span>
+            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">
+              ${pago.descripcion}
+              ${pago.completado ? '<span class="ml-2 text-green-600 text-sm">(Pagado)</span>' : ''}
+            </p>
+            <span class="ml-2 font-bold">${formatoMoneda(pago.completado ? pago.valor_pagado || pago.valor : pago.valor)}</span>
           </div>
-          <div class="flex items-center text-sm text-gray-500 mt-1">
-            <i class="fas fa-university mr-1 text-xs"></i>
-            <span class="mr-3">${pago.banco_destino || 'Sin banco asignado'}</span>
-            <i class="fas fa-calendar-day mr-1 text-xs"></i>
-            <span class="${estaVencido ? 'text-red-500 font-semibold' : ''}">${fechaVencimiento}</span>
+          <div class="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-2">
+            <span class="flex items-center">
+              <i class="fas fa-university mr-1 text-xs"></i>
+              ${pago.banco_destino || 'Sin banco asignado'}
+            </span>
+            <span class="flex items-center ${estaVencido ? 'text-red-500 font-semibold' : ''}">
+              <i class="fas fa-calendar-day mr-1 text-xs"></i>
+              ${fechaVencimiento}
+            </span>
+            ${pago.completado ? `
+              <span class="flex items-center text-green-600">
+                <i class="fas fa-check-circle mr-1 text-xs"></i>
+                Pagado el ${fechaPago}
+              </span>
+            ` : ''}
           </div>
         </div>
         <div class="flex space-x-2 ml-4">
@@ -1722,20 +2281,22 @@ async function cargarPagosPendientes() {
             class="text-blue-500 hover:text-blue-700 p-1" title="Editar">
             <i class="fas fa-edit"></i>
           </button>
-          <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')"
-            class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
-            <i class="fas fa-check-circle"></i>
-          </button>
+          ${!pago.completado ? `
+            <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')"
+              class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
+              <i class="fas fa-check-circle"></i>
+            </button>
+          ` : ''}
           <button onclick="eliminarPagoPendiente(${pago.id})"
             class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
             <i class="fas fa-trash-alt"></i>
           </button>
         </div>
       `;
-      
+
       pagosContainer.appendChild(pagoDiv);
     });
-    
+
     categoriaDiv.appendChild(pagosContainer);
     contenedor.appendChild(categoriaDiv);
   }
@@ -1761,14 +2322,14 @@ async function cargarPagosPendientes() {
       <div class="text-left">
         <label class="block text-sm font-medium mb-1">Descripción</label>
         <input id="swal-descripcion" value="${pago.descripcion}" class="swal2-input">
-        
+
         <label class="block text-sm font-medium mb-1 mt-3">Valor</label>
         <input type="number" id="swal-valor" value="${pago.valor}" class="swal2-input">
-        
+
         <label class="block text-sm font-medium mb-1 mt-3">Banco Destino</label>
         <select id="swal-banco" class="swal2-input">
           <option value="">-- Sin asignar --</option>
-          ${Object.keys(bancos).map(banco => 
+          ${Object.keys(bancos).map(banco =>
             `<option value="${banco}" ${banco === pago.banco_destino ? 'selected' : ''}>${banco}</option>`
           ).join('')}
         </select>
@@ -1802,7 +2363,7 @@ async function cargarPagosPendientes() {
     }
   }
 }
-    
+
  // Marcar pago como completado y convertirlo en gasto
 // Modificar la función marcarPagoComoCompletado
 async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, bancoActual = "") {
@@ -1842,7 +2403,7 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
   if (!gastoError) {
     // Actualizar el pago como completado (con fecha exacta)
     const { error: updateError } = await supabase.from('pagos_pendientes')
-      .update({ 
+      .update({
         completado: true,
         fecha_completado: fechaPago,
         banco_destino: bancoActual,
@@ -1853,7 +2414,7 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
     if (!updateError) {
       await cargarPagosPendientes();
       await cargarMovimientosDesdeSupabase();
-      mostrarAlerta("✅ Pago registrado correctamente", "success");
+      mostrarAlerta("Pago registrado correctamente", "success");
     } else {
       console.error("Error al actualizar pago pendiente:", updateError);
       mostrarAlerta("Error al marcar el pago como completado", "error");
@@ -1864,129 +2425,9 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
   }
 }
 
-// Modificar la función cargarPagosPendientes para mostrar pagos completados de este mes
-async function cargarPagosPendientes() {
-  const contenedor = document.getElementById("listaPagosPendientes");
-  contenedor.innerHTML = "<div class='text-center py-4'><i class='fas fa-spinner fa-spin text-indigo-500'></i> Cargando pagos pendientes...</div>";
-
-  // Obtener el primer y último día del mes actual
-  const hoy = new Date();
-  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
-
-  // Cargar todos los pagos (pendientes y completados este mes)
-  const { data, error } = await supabase
-    .from("pagos_pendientes")
-    .select("*")
-    .or(`completado.eq.false,fecha_completado.gte.${primerDiaMes.toISOString()},fecha_completado.is.null`)
-    .order("fecha_vencimiento", { ascending: true });
-
-  if (error) {
-    contenedor.innerHTML = `<div class="text-red-500 text-center py-4"><i class="fas fa-exclamation-circle mr-2"></i>Error al cargar los pagos pendientes</div>`;
-    console.error("Error al cargar pagos pendientes:", error);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    contenedor.innerHTML = `<div class="text-gray-500 text-center py-4">No hay pagos pendientes registrados.</div>`;
-    return;
-  }
-
-  contenedor.innerHTML = "";
-  
-  // Agrupar por categoría
-  const pagosPorCategoria = {};
-  data.forEach(pago => {
-    if (!pagosPorCategoria[pago.categoria || "Sin categoría"]) {
-      pagosPorCategoria[pago.categoria || "Sin categoría"] = [];
-    }
-    pagosPorCategoria[pago.categoria || "Sin categoría"].push(pago);
-  });
-
-  // Mostrar por categorías
-  for (const categoria in pagosPorCategoria) {
-    const categoriaDiv = document.createElement("div");
-    categoriaDiv.className = "mb-6";
-    
-    const categoriaTitle = document.createElement("h3");
-    categoriaTitle.className = "font-semibold text-lg mb-2 text-indigo-600 border-b pb-1";
-    categoriaTitle.textContent = categoria;
-    categoriaDiv.appendChild(categoriaTitle);
-    
-    const pagosContainer = document.createElement("div");
-    pagosContainer.className = "space-y-3";
-    
-    pagosPorCategoria[categoria].forEach(pago => {
-      const pagoDiv = document.createElement("div");
-      pagoDiv.className = `border p-3 rounded-lg shadow-sm ${pago.completado ? 'bg-green-100' : 'bg-white'}`;
-      
-      const fechaVencimiento = pago.fecha_vencimiento 
-        ? new Date(pago.fecha_vencimiento).toLocaleDateString("es-CO", { day: 'numeric', month: 'short' })
-        : "Sin fecha";
-      
-      const fechaPago = pago.fecha_completado 
-        ? new Date(pago.fecha_completado).toLocaleDateString("es-CO", { day: 'numeric', month: 'short', year: 'numeric' })
-        : "";
-      
-      const hoy = new Date();
-      const fechaVenc = pago.fecha_vencimiento ? new Date(pago.fecha_vencimiento) : null;
-      const estaVencido = fechaVenc && fechaVenc < hoy && !pago.completado;
-      
-      pagoDiv.innerHTML = `
-        <div class="flex-1">
-          <div class="flex items-start justify-between">
-            <p class="font-medium ${estaVencido ? 'text-red-600' : ''}">
-              ${pago.descripcion}
-              ${pago.completado ? '<span class="ml-2 text-green-600 text-sm">(Pagado)</span>' : ''}
-            </p>
-            <span class="ml-2 font-bold">${formatoMoneda(pago.completado ? pago.valor_pagado || pago.valor : pago.valor)}</span>
-          </div>
-          <div class="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-2">
-            <span class="flex items-center">
-              <i class="fas fa-university mr-1 text-xs"></i>
-              ${pago.banco_destino || 'Sin banco asignado'}
-            </span>
-            <span class="flex items-center ${estaVencido ? 'text-red-500 font-semibold' : ''}">
-              <i class="fas fa-calendar-day mr-1 text-xs"></i>
-              ${fechaVencimiento}
-            </span>
-            ${pago.completado ? `
-              <span class="flex items-center text-green-600">
-                <i class="fas fa-check-circle mr-1 text-xs"></i>
-                Pagado el ${fechaPago}
-              </span>
-            ` : ''}
-          </div>
-        </div>
-        <div class="flex space-x-2 ml-4">
-          <button onclick="editarPagoPendiente(${pago.id})" 
-            class="text-blue-500 hover:text-blue-700 p-1" title="Editar">
-            <i class="fas fa-edit"></i>
-          </button>
-          ${!pago.completado ? `
-            <button onclick="marcarPagoComoCompletado(${pago.id}, ${pago.valor}, '${pago.descripcion.replace(/'/g, "\\'")}', '${pago.categoria}', '${pago.banco_destino || ''}')" 
-              class="text-green-500 hover:text-green-700 p-1" title="Marcar como pagado">
-              <i class="fas fa-check-circle"></i>
-            </button>
-          ` : ''}
-          <button onclick="eliminarPagoPendiente(${pago.id})" 
-            class="text-red-500 hover:text-red-700 p-1" title="Eliminar">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
-      `;
-      
-      pagosContainer.appendChild(pagoDiv);
-    });
-    
-    categoriaDiv.appendChild(pagosContainer);
-    contenedor.appendChild(categoriaDiv);
-  }
-}
-
 // Función corregida para reiniciar pagos pendientes al nuevo mes
 async function reiniciarPagosPendientes() {
-  console.log("🔄 Iniciando reinicio de pagos pendientes...");
+  console.log("Iniciando reinicio de pagos pendientes...");
 
   const hoy = new Date();
   const mesActual = hoy.getMonth(); // 0-11 (julio=6, agosto=7)
@@ -1999,11 +2440,11 @@ async function reiniciarPagosPendientes() {
     .eq('completado', true);
 
   if (error) {
-    console.error("❌ Error al buscar pagos completados:", error);
+    console.error("Error al buscar pagos completados:", error);
     return;
   }
 
-  console.log(`📋 Encontrados ${pagosCompletados?.length || 0} pagos completados para reiniciar`);
+  console.log(`Encontrados ${pagosCompletados?.length || 0} pagos completados para reiniciar`);
 
   // 2. Para cada pago completado, crear uno nuevo para el próximo mes
   for (const pago of pagosCompletados || []) {
@@ -2042,88 +2483,17 @@ async function reiniciarPagosPendientes() {
       }]);
 
       if (insertError) {
-        console.error(`❌ Error al crear nuevo pago para "${pago.descripcion}":`, insertError);
+        console.error(`Error al crear nuevo pago para "${pago.descripcion}":`, insertError);
       } else {
-        console.log(`✅ Pago reiniciado: ${pago.descripcion} - ${nuevaFechaVencimiento ? nuevaFechaVencimiento.toLocaleDateString('es-CO') : 'Sin fecha'}`);
+        console.log(`Pago reiniciado: ${pago.descripcion} - ${nuevaFechaVencimiento ? nuevaFechaVencimiento.toLocaleDateString('es-CO') : 'Sin fecha'}`);
       }
 
     } catch (err) {
-      console.error(`❌ Error procesando pago "${pago.descripcion}":`, err);
+      console.error(`Error procesando pago "${pago.descripcion}":`, err);
     }
   }
 
-  console.log("🎉 Reinicio de pagos pendientes completado");
-}
-
-// Función corregida para cerrar mes (incluye el reinicio automático)
-async function cerrarMes() {
-  if (confirm("¿Estás seguro de cerrar el mes actual? Esta acción reiniciará los pagos pendientes para el próximo mes.")) {
-    const fechaActual = new Date();
-    const mes = fechaActual.getMonth() + 1;
-    const año = fechaActual.getFullYear();
-    const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
-
-    // Calcular ingresos y gastos totales
-    let ingresos = 0, gastos = 0;
-    for (const banco in movimientos) {
-      for (const mov of movimientos[banco]) {
-        if (mov.tipo === "ingreso") ingresos += mov.valor;
-        else if (mov.tipo === "gasto") gastos += mov.valor;
-      }
-    }
-
-    // Convertir movimientos por banco a una lista plana
-    const movimientosPlanos = [];
-    for (const banco in movimientos) {
-      for (const mov of movimientos[banco]) {
-        movimientosPlanos.push({
-          ...mov,
-          banco_destino: mov.banco || banco
-        });
-      }
-    }
-
-    // Guardar en Supabase
-    const { error } = await supabase.from("historial_mensual").insert([
-      {
-        mes: mes,
-        año: año,
-        nombre_mes: nombreMes,
-        fecha_cierre: fechaActual.toISOString(),
-        ingresos: ingresos,
-        gastos: gastos,
-        balance: ingresos - gastos,
-        saldos: bancos,
-        movimientos: movimientosPlanos
-      }
-    ]);
-
-    if (error) {
-      console.error("❌ Error al guardar en historial_mensual:", error);
-      mostrarAlerta("❌ No se pudo guardar el mes cerrado", "error");
-      return;
-    }
-
-    // Limpiar tabla movimientos
-    const { error: deleteError } = await supabase.from("movimientos").delete().neq("id", 0);
-    if (deleteError) {
-      console.error("❌ Error al limpiar tabla movimientos:", deleteError);
-    }
-
-    // Reiniciar pagos pendientes para el próximo mes
-    await reiniciarPagosPendientes();
-
-    // Reiniciar estado
-    for (const banco in bancos) {
-      bancos[banco] = 0;
-      movimientos[banco] = [];
-    }
-
-    document.getElementById("historial").innerHTML = "";
-    actualizarTotales();
-    await cargarPagosPendientes(); // Recargar la lista de pagos
-    mostrarAlerta(`✅ Mes ${nombreMes} cerrado correctamente. Pagos pendientes reiniciados para el próximo mes.`, "success");
-  }
+  console.log("Reinicio de pagos pendientes completado");
 }
 
 // Eliminar pago pendiente
@@ -2143,15 +2513,32 @@ async function eliminarPagoPendiente(idPago) {
     await cargarPagosPendientes();
     mostrarAlerta("Pago pendiente eliminado correctamente", "success");
   }
-}                                        
-                            
-// Inicializar aplicación
+}
+
+// ✅ FUNCIÓN CORREGIDA: Inicializar aplicación con carga completa de préstamos
 (async () => {
-  await cargarMovimientosDesdeSupabase();
-  actualizarFiltroBanco();
-  await cargarPagosPendientes(); // Cargar pagos pendientes al inicio
+  console.log("🚀 Iniciando aplicación...");
+
+  try {
+    // 1. Cargar movimientos y préstamos desde Supabase
+    await cargarMovimientosDesdeSupabase();
+
+    // 2. Cargar préstamos activos (esto actualiza bancos["Préstamos"])
+    await cargarPrestamosActivos();
+
+    // 3. Actualizar interfaz
+    actualizarFiltroBanco();
+
+    // 4. Cargar pagos pendientes
+    await cargarPagosPendientes();
+
+    console.log("✅ Aplicación inicializada correctamente");
+  } catch (error) {
+    console.error("❌ Error al inicializar aplicación:", error);
+    mostrarAlerta("Error al cargar la aplicación", "error");
+  }
 })();
-                                            
+
 </script>   
 </body>
 </html>
