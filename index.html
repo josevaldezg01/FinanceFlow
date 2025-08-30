@@ -171,6 +171,25 @@
         </button>
     </div>
 
+    <!-- **NUEVO: Selector de Mes Activo** -->
+    <section class="mb-6 bg-white p-4 rounded-lg shadow-md">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <h2 class="text-xl font-semibold flex items-center">
+            <i class="fas fa-calendar-check mr-2 text-indigo-500"></i>Mes Activo
+          </h2>
+          <div class="flex items-center space-x-2 bg-indigo-50 px-4 py-2 rounded-lg">
+            <i class="fas fa-calendar-alt text-indigo-600"></i>
+            <span id="mesActivoDisplay" class="font-semibold text-indigo-800">Agosto 2025</span>
+          </div>
+        </div>
+        <button id="btnCambiarMes" onclick="cambiarMesActivo()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center">
+          <i class="fas fa-arrow-right mr-2"></i>Cambiar a Septiembre 2025
+        </button>
+      </div>
+    </section>
+
     <!-- Botón para cerrar mes y ver meses anteriores -->
     <section class="mb-6 flex justify-between items-center">
       <button onclick="mostrarModalMesesAnteriores()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded flex items-center">
@@ -764,6 +783,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     // Almacenamiento de meses cerrados
     let mesesCerrados = JSON.parse(localStorage.getItem('mesesCerrados')) || [];
 
+    // **NUEVA VARIABLE: Mes activo actual**
+    let mesActivoActual = "2025-08"; // Formato YYYY-MM
+
     // Variables para gráficos
     let distributionChart, monthlyChart;
 
@@ -771,6 +793,62 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     function formatoMoneda(valor) {
       return "$" + valor.toLocaleString("es-CO");
     }
+
+    // **NUEVA FUNCIÓN: Obtener información del mes activo**
+function obtenerInfoMesActivo() {
+  const [anio, mes] = mesActivoActual.split('-').map(Number);
+  const fecha = new Date(anio, mes - 1, 1);
+
+  const nombreMes = fecha.toLocaleDateString('es-ES', { month: 'long' });
+  const nombreCapitalizado = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+  // Calcular próximo mes
+  const proximaFecha = new Date(anio, mes, 1);
+  const proximoMes = proximaFecha.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  const proximoCapitalizado = proximoMes.charAt(0).toUpperCase() + proximoMes.slice(1);
+
+  const proximoFormato = `${proximaFecha.getFullYear()}-${String(proximaFecha.getMonth() + 1).padStart(2, '0')}`;
+
+  return {
+    nombreCompleto: `${nombreCapitalizado} ${anio}`,
+    proximoNombre: proximoCapitalizado,
+    proximoFormato: proximoFormato
+  };
+}
+
+// **NUEVA FUNCIÓN: Actualizar display del mes activo**
+function actualizarDisplayMesActivo() {
+  const info = obtenerInfoMesActivo();
+
+  document.getElementById("mesActivoDisplay").textContent = info.nombreCompleto;
+  document.getElementById("btnCambiarMes").innerHTML = `
+    <i class="fas fa-arrow-right mr-2"></i>Cambiar a ${info.proximoNombre}
+  `;
+}
+
+// **NUEVA FUNCIÓN: Cambiar al siguiente mes**
+async function cambiarMesActivo() {
+  const info = obtenerInfoMesActivo();
+
+  const confirmar = await Swal.fire({
+    title: `¿Cambiar a ${info.proximoNombre}?`,
+    text: `Todos los movimientos nuevos se registrarán en ${info.proximoNombre}`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: `Sí, cambiar a ${info.proximoNombre}`,
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (confirmar.isConfirmed) {
+    mesActivoActual = info.proximoFormato;
+    actualizarDisplayMesActivo();
+
+    // Recargar movimientos del nuevo mes activo
+    await cargarMovimientosDesdeSupabase();
+
+    mostrarAlerta(`Mes activo cambiado a ${info.proximoNombre}`, "success");
+  }
+}
 
     // Inicializar selects de bancos
 function actualizarFiltroBanco() {
@@ -1063,7 +1141,8 @@ async function registrarPrestamo() {
         descripcion: `Préstamo a ${persona} - ${descripcion}`,
         categoria: "Préstamos",
         banco_destino: bancoOrigen,
-        fecha: fecha
+        fecha: fecha,
+        mes_contable: mesActivoActual // **NUEVA LÍNEA**
       }
     ]);
 
@@ -1289,16 +1368,17 @@ async function registrarAbonoPrestamo(idPrestamo, valorPendiente, persona, valor
     }
 
     // 2. Registrar ingreso por el abono en el banco seleccionado
-    const { error: ingresoError } = await supabase.from('movimientos').insert([
-      {
-        tipo: "ingreso",
-        valor: valor,
-        descripcion: `Abono préstamo de ${persona} (${formatoMoneda(nuevoValorPendiente)} pendiente)`,
-        categoria: "Reembolso préstamos",
-        banco_destino: banco,
-        fecha: fechaAbono
-      }
-    ]);
+const { error: ingresoError } = await supabase.from('movimientos').insert([
+  {
+    tipo: "ingreso",
+    valor: valor,
+    descripcion: `Abono préstamo de ${persona} (${formatoMoneda(nuevoValorPendiente)} pendiente)`,
+    categoria: "Reembolso préstamos",
+    banco_destino: banco,
+    fecha: fechaAbono,
+    mes_contable: mesActivoActual // **NUEVA LÍNEA**
+  }
+]);
 
     if (ingresoError) {
       console.error("❌ Error al registrar ingreso:", ingresoError);
@@ -1377,16 +1457,17 @@ async function marcarPrestamoComoPagado(idPrestamo, persona, valorPendiente) {
     }
 
     // 2. Registrar ingreso por el pago completo
-    const { error: ingresoError } = await supabase.from('movimientos').insert([
-      {
-        tipo: "ingreso",
-        valor: valorPendiente,
-        descripcion: `Pago completo préstamo de ${persona}`,
-        categoria: "Reembolso préstamos",
-        banco_destino: bancoDestino,
-        fecha: fechaPago
-      }
-    ]);
+const { error: ingresoError } = await supabase.from('movimientos').insert([
+  {
+    tipo: "ingreso",
+    valor: valorPendiente,
+    descripcion: `Pago completo préstamo de ${persona}`,
+    categoria: "Reembolso préstamos",
+    banco_destino: bancoDestino,
+    fecha: fechaPago,
+    mes_contable: mesActivoActual // **NUEVA LÍNEA**
+  }
+]);
 
     if (ingresoError) {
       console.error("❌ Error al registrar ingreso:", ingresoError);
@@ -1454,7 +1535,7 @@ async function registrarIngreso() {
     return;
   }
 
- // Guardar en Supabase
+ // Guardar en Supabase con mes_contable
 const fecha = new Date().toISOString();
 const { error } = await supabase.from('movimientos').insert([
   {
@@ -1463,7 +1544,8 @@ const { error } = await supabase.from('movimientos').insert([
     descripcion: desc,
     categoria: categoria,
     banco_destino: banco,
-    fecha: fecha
+    fecha: fecha,
+    mes_contable: mesActivoActual // **NUEVA LÍNEA**
   }
 ]);
 
@@ -1488,13 +1570,14 @@ actualizarTotales();
   mostrarAlerta("Ingreso registrado con éxito", "success");
 }
 
-// ✅ FUNCIÓN CORREGIDA: Leer los movimientos desde Supabase al cargar la página
+// ✅ FUNCIÓN MODIFICADA: Cargar movimientos solo del mes activo
 async function cargarMovimientosDesdeSupabase() {
-  console.log("🔄 Cargando movimientos desde Supabase...");
+  console.log(`🔄 Cargando movimientos del mes activo: ${mesActivoActual}`);
 
   const { data, error } = await supabase
     .from('movimientos')
     .select('*')
+    .eq('mes_contable', mesActivoActual)
     .order('fecha', { ascending: true });
 
   if (error) {
@@ -1515,7 +1598,7 @@ async function cargarMovimientosDesdeSupabase() {
   // ✅ IMPORTANTE: Cargar préstamos activos PRIMERO
   await cargarSaldoPrestamos();
 
-  console.log(`📊 Procesando ${data?.length || 0} movimientos...`);
+  console.log(`📊 Procesando ${data?.length || 0} movimientos del mes ${mesActivoActual}...`);
 
   // Procesar cada movimiento
   data.forEach(mov => {
@@ -1549,11 +1632,11 @@ async function cargarMovimientosDesdeSupabase() {
     }
   });
 
-  console.log("✅ Movimientos cargados correctamente");
+  console.log(`✅ Movimientos del mes ${mesActivoActual} cargados correctamente`);
   actualizarTotales();
 }
 
-  // Registrar gasto
+// Registrar gasto
 async function registrarGasto() {
   const banco = document.getElementById("bancoGasto").value;
   const valor = Number(document.getElementById("valorGasto").value);
@@ -1579,7 +1662,8 @@ async function registrarGasto() {
       descripcion: desc,
       categoria: categoria,
       banco_destino: banco,
-      fecha: fecha
+      fecha: fecha,
+      mes_contable: mesActivoActual // **NUEVA LÍNEA**
     }
   ]);
 
@@ -1631,7 +1715,8 @@ async function transferir() {
       descripcion: descripcion,
       banco_origen: desde,
       banco_destino: hacia,
-      fecha: fecha
+      fecha: fecha,
+      mes_contable: mesActivoActual // **NUEVA LÍNEA**
     }
   ]);
 
@@ -1923,15 +2008,17 @@ function aplicarFiltros() {
       mostrarAlerta("Historial exportado como CSV", "success");
     }
 
-  // Cerrar el mes actual
+// Cerrar el mes actual
 async function cerrarMes() {
-  if (confirm("¿Estás seguro de cerrar el mes actual? Esta acción no se puede deshacer.")) {
-    const fechaActual = new Date();
-    const mes = fechaActual.getMonth() + 1;
-    const año = fechaActual.getFullYear();
-    const nombreMes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+  const info = obtenerInfoMesActivo();
 
-    // Calcular ingresos y gastos totales
+  if (confirm(`¿Estás seguro de cerrar ${info.nombreCompleto}? Esta acción no se puede deshacer.`)) {
+    const fechaActual = new Date();
+
+    // Extraer mes y año del mes activo
+    const [anio, mes] = mesActivoActual.split('-').map(Number);
+
+    // Calcular ingresos y gastos totales del mes activo
     let ingresos = 0, gastos = 0;
     for (const banco in movimientos) {
       for (const mov of movimientos[banco]) {
@@ -1955,14 +2042,15 @@ async function cerrarMes() {
     const { error } = await supabase.from("historial_mensual").insert([
       {
         mes: mes,
-        año: año,
-        nombre_mes: nombreMes,
+        año: anio,
+        nombre_mes: info.nombreCompleto.split(' ')[0].toLowerCase(), // Solo el nombre del mes
         fecha_cierre: fechaActual.toISOString(),
         ingresos: ingresos,
         gastos: gastos,
         balance: ingresos - gastos,
         saldos: bancos,
-        movimientos: movimientosPlanos
+        movimientos: movimientosPlanos,
+        mes_contable: mesActivoActual // **NUEVA LÍNEA**
       }
     ]);
 
@@ -1972,12 +2060,24 @@ async function cerrarMes() {
       return;
     }
 
-    // Limpiar tabla movimientos
-    const { error: deleteError } = await supabase.from("movimientos").delete().neq("id", 0); // Borra todo
+    // Limpiar tabla movimientos del mes activo
+    const { error: deleteError } = await supabase
+      .from("movimientos")
+      .delete()
+      .eq("mes_contable", mesActivoActual);
 
     if (deleteError) {
       console.error("Error al limpiar tabla movimientos:", deleteError);
     }
+
+    // **NUEVA LÍNEA: Cambiar automáticamente al siguiente mes**
+    mesActivoActual = info.proximoFormato;
+
+    // **NUEVA LÍNEA: Guardar mes activo en localStorage**
+    localStorage.setItem('mesActivoActual', mesActivoActual);
+
+    // **NUEVA LÍNEA: Actualizar display del mes activo**
+    actualizarDisplayMesActivo();
 
     // Reiniciar estado (pero mantener préstamos)
     for (const banco in bancos) {
@@ -1988,10 +2088,15 @@ async function cerrarMes() {
     }
 
     document.getElementById("historial").innerHTML = "";
+
+    // **NUEVA LÍNEA: Cargar préstamos activos para mantener el saldo correcto**
+    await cargarSaldoPrestamos();
+
     actualizarTotales();
     await reiniciarPagosPendientes();
     await cargarPagosPendientes();
-    mostrarAlerta(`Mes ${nombreMes} cerrado correctamente.`, "success");
+
+    mostrarAlerta(`Mes ${info.nombreCompleto} cerrado correctamente. Ahora activo: ${info.proximoNombre}`, "success");
   }
 }
 
@@ -2390,16 +2495,17 @@ async function marcarPagoComoCompletado(idPago, valor, descripcion, categoria, b
     return;
   }
 
-  // Registrar el gasto
-  const fechaPago = new Date().toISOString();
-  const { error: gastoError } = await supabase.from('movimientos').insert([{
-    tipo: "gasto",
-    valor: valor,
-    descripcion: `Pago completado: ${descripcion}`,
-    categoria: categoria || "Pago pendiente",
-    banco_destino: bancoActual,
-    fecha: fechaPago
-  }]);
+ // Registrar el gasto
+const fechaPago = new Date().toISOString();
+const { error: gastoError } = await supabase.from('movimientos').insert([{
+  tipo: "gasto",
+  valor: valor,
+  descripcion: `Pago completado: ${descripcion}`,
+  categoria: categoria || "Pago pendiente",
+  banco_destino: bancoActual,
+  fecha: fechaPago,
+  mes_contable: mesActivoActual // **NUEVA LÍNEA**
+}]);
 
   if (!gastoError) {
     // Actualizar el pago como completado (con fecha exacta)
@@ -2521,6 +2627,9 @@ async function eliminarPagoPendiente(idPago) {
   console.log("🚀 Iniciando aplicación...");
 
   try {
+    // **NUEVA LÍNEA: Actualizar display del mes activo**
+    actualizarDisplayMesActivo();
+
     // 1. Cargar movimientos y préstamos desde Supabase
     await cargarMovimientosDesdeSupabase();
 
