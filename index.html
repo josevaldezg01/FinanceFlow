@@ -2072,10 +2072,10 @@ async function cerrarMes() {
 
     // **NUEVA LÍNEA: Cambiar automáticamente al siguiente mes**
     mesActivoActual = info.proximoFormato;
-
+    
     // **NUEVA LÍNEA: Guardar mes activo en localStorage**
     localStorage.setItem('mesActivoActual', mesActivoActual);
-
+    
     // **NUEVA LÍNEA: Actualizar display del mes activo**
     actualizarDisplayMesActivo();
 
@@ -2088,14 +2088,14 @@ async function cerrarMes() {
     }
 
     document.getElementById("historial").innerHTML = "";
-
+    
     // **NUEVA LÍNEA: Cargar préstamos activos para mantener el saldo correcto**
     await cargarSaldoPrestamos();
-
+    
     actualizarTotales();
     await reiniciarPagosPendientes();
     await cargarPagosPendientes();
-
+    
     mostrarAlerta(`Mes ${info.nombreCompleto} cerrado correctamente. Ahora activo: ${info.proximoNombre}`, "success");
   }
 }
